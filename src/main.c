@@ -29,6 +29,12 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include <unistd.h>
+#include <assert.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include "utils.h"
 #include "constants.h"
 #include "coverage_vis.h"
@@ -40,6 +46,13 @@
 
 static unsigned int check_env_vars(void);
 static void decode_cmd_line(int argc, char *argv[]);
+static unsigned int create_socket_mininet(void);
+
+
+/* added by tz for mini-savi*/
+int sockfd = 0;
+struct sockaddr_in saddr;
+
 
 int
 main(int argc, char *argv[])
@@ -94,12 +107,34 @@ main(int argc, char *argv[])
   }
 
   /* loop until exit */
+  create_socket_mininet();
   while (sats_update() && tk_update());
 
   Tcl_DeleteInterp(interp);
 
   exit(0);
 }
+
+static unsigned int create_socket_mininet(void)
+{
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+  if( sockfd == -1 )
+  {
+    error_and_exit("create socket for mininet link info failed! ");
+  }
+
+  //struct sockaddr_in saddr;
+  memset(&saddr,0,sizeof(saddr));
+  saddr.sin_family = AF_INET;
+  saddr.sin_port = htons(12345);
+  saddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+  if(connect(sockfd,(struct sockaddr*)&saddr,sizeof(saddr)) < 0){
+    error_and_exit("socket connect failed! ");
+  }
+}
+
 
 static unsigned int
 check_env_vars(void)

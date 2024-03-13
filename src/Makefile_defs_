@@ -37,7 +37,8 @@ CC = gcc
 # match.                                               #
 #                                                      #
 ########################################################
-TCL_INCLUDES = -I/usr/local/lib/tcl8.5 -I/usr/local/lib/tk8.5
+#TCL_INCLUDES = -I/usr/local/lib/tcl8.5 -I/usr/local/lib/tk8.5
+TCL_INCLUDES = -I/usr/lib/tcl8.6 -I/usr/lib/tk8.6
 
 ########################################################
 #                                                      #
@@ -45,7 +46,7 @@ TCL_INCLUDES = -I/usr/local/lib/tcl8.5 -I/usr/local/lib/tk8.5
 # libtcl.a and libtk.a. Alter to suit - see above.     #
 #                                                      #
 ########################################################
-TCL_LIBS = -ltcl8.5 -ltk8.5
+TCL_LIBS = -ltcl8.6 -ltk8.6
 
 # the above works on most Linux platforms.
 # TCL_LIBS = -ltcl -ltk

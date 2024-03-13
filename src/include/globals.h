@@ -30,6 +30,10 @@
 
 #define LENGTH_STRING_BUFFER 256
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 char cmd[LENGTH_STRING_BUFFER];
 
 char command_switches[LENGTH_STRING_BUFFER];

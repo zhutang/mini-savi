@@ -334,6 +334,42 @@ sats_init()
   set_time(0.0);
 }
 
+//added by tz
+
+extern int sockfd;
+extern struct sockaddr_in saddr;
+
+void send_sats_coor()
+{
+  static long long inter = 0;
+  char coors[102400] = {0};
+  char temp[1024] = {0};
+  int i = 0;
+
+  inter = inter++;
+
+  if (inter % 10 != 0) //every 10 update times notify ISL delay update once
+    return;
+
+  //fgets(coors,128,stdin);
+  Satellite_list sl = constellation.satellites;
+
+  while (sl) {
+
+    //sats_debug_cmd(0,0);
+
+    //"name: id: %d, x: %lf, y: %lf, z: %lf, name: %s, i: %d\r\n",  sl->s->id, sl->s->x_C.x, sl->s->x_C.y, sl->s->x_C.z, sl->s->name,  i
+    sprintf(temp, "%d, %lf, %lf, %lf, %s, %d\r\n",  sl->s->id, sl->s->x_C.x, sl->s->x_C.y, sl->s->x_C.z, sl->s->name, i);
+    strcat(coors, temp);
+    sl = sl->next;
+    i = i + strlen(temp);
+    memset(temp, 0, sizeof(temp));
+ }
+
+  sendto(sockfd, "ISL info start\r\n", strlen("ISL info start\r\n"), 0, (struct ckaddr*)&saddr, sizeof(saddr));
+  sendto(sockfd, coors, strlen(coors), 0, (struct ckaddr*)&saddr, sizeof(saddr));
+  sendto(sockfd, "ISL info end\r\n", strlen("ISL info end\r\n"), 0, (struct ckaddr*)&saddr, sizeof(saddr));
+}
 
 /*
  * sats_update
@@ -358,6 +394,7 @@ sats_update()
   double oldt;
 
   if (reset) {
+    fprintf(stderr, "reset------------------------------------");
     set_time(0.0);
     computed_time = 0.0;
     init_coverage_time();
@@ -375,11 +412,11 @@ sats_update()
     if (geomview_flag) {
       gv_start();
       if (transforms_needed) {
-	gv_trans_list_create(constellation.satellites);
+        gv_trans_list_create(constellation.satellites);
       }
       for (i = 0; i < N_VIEW_MODULES; i++) {
-	if (view_modules[i].relocate_fn)
-	  view_modules[i].relocate_fn(&constellation);
+        if (view_modules[i].relocate_fn)
+          view_modules[i].relocate_fn(&constellation);
       }
       gv_delayed_view_update();
       earth_place(ttime, constellation.pcb);
@@ -388,6 +425,9 @@ sats_update()
       coverage_display(constellation.satellites, FALSE, constellation.pcb);
       gv_stop();
       gv_set_ready();
+
+      //added by tz for link (ISL) update in mininet
+      send_sats_coor();
     } else {
       /* we're not talking to Geomview, but still need to draw coverage */
       coverage_display(constellation.satellites, FALSE, constellation.pcb);
@@ -396,25 +436,33 @@ sats_update()
     project_tracks_reset();
 
   } else if (motion) {
+    fprintf(stderr, "motion------------------------------------");
 
     if (computed && !realtime_flag &&
-	((old_ttime != ttime) ||
-	 (old_delta_t != delta_t) ||
-	 (old_direction != direction))) computed = FALSE;
+      ((old_ttime != ttime) ||
+      (old_delta_t != delta_t) ||
+      (old_direction != direction))) computed = FALSE;
 
     if (!computed) {
+      fprintf(stderr, "!computed------------------------------------");
 
       if (!realtime_flag || single_step) {
-	computed_time = ttime + direction * delta_t;
-	old_ttime = ttime;
-	old_delta_t = delta_t;
-	old_direction = direction;
+        computed_time = ttime + direction * delta_t;
+        old_ttime = ttime;
+        old_delta_t = delta_t;
+        old_direction = direction;
       } else {
-	oldt = realtime;
-	set_realtime();
-	computed_time = ttime + direction * (realtime - oldt) * delta_t;
+        oldt = realtime;
+        set_realtime();
+        computed_time = ttime + direction * (realtime - oldt) * delta_t;
       }
       constellation_compute_positions(&constellation, computed_time);
+
+          
+        //added by tz for link (ISL) update in mininet
+        send_sats_coor();
+
+
       coverage_decay();
       coverage_compute(constellation.satellites, FALSE, constellation.pcb);
       tracks_compute(constellation.satellites, constellation.pcb);
@@ -424,41 +472,43 @@ sats_update()
       millisleep(1);
 
     } else {
+      fprintf(stderr, "computed!!!------------------------------------");
 
       if (!geomview_flag || gv_ready()) {
-	set_time(computed_time);
+        set_time(computed_time);
 
-	fisheye_display(constellation.satellites, FALSE, constellation.pcb);
+        fisheye_display(constellation.satellites, FALSE, constellation.pcb);
 
-	/* plot all satellites */
-	if (geomview_flag) {
-	  gv_start();
-	  if (transforms_needed) {
-	    gv_trans_list_create(constellation.satellites);
-	  }
+        /* plot all satellites */
+        if (geomview_flag) {
+          gv_start();
+          if (transforms_needed) {
+            gv_trans_list_create(constellation.satellites);
+          }
 
-	  for (i = 0; i < N_VIEW_MODULES; i++) {
-	    if (view_modules[i].relocate_fn)
-	      view_modules[i].relocate_fn(&constellation);
-	  }
-	  gv_delayed_view_update();
-	  earth_place(ttime, constellation.pcb);
-	  sun_place(ttime, constellation.pcb);
-	  /* updates display, sends scratchfile if necessary. */
-	  coverage_display(constellation.satellites, FALSE, constellation.pcb);
-	  gv_stop();
-	  gv_set_ready();
-	} else {
-	  /* we're not talking to Geomview, but still need to draw coverage */
+          for (i = 0; i < N_VIEW_MODULES; i++) {
+            if (view_modules[i].relocate_fn)
+              view_modules[i].relocate_fn(&constellation);
+          }
+          gv_delayed_view_update();
+          earth_place(ttime, constellation.pcb);
+          sun_place(ttime, constellation.pcb);
+          /* updates display, sends scratchfile if necessary. */
           coverage_display(constellation.satellites, FALSE, constellation.pcb);
+          gv_stop();
+          gv_set_ready();
+
+        } else {
+          /* we're not talking to Geomview, but still need to draw coverage */
+                coverage_display(constellation.satellites, FALSE, constellation.pcb);
+              }
+
+        if (single_step) {
+          single_step = FALSE;
+          motion = FALSE;
         }
 
-	if (single_step) {
-	  single_step = FALSE;
-	  motion = FALSE;
-	}
-
-	computed = FALSE;
+        computed = FALSE;
       }
     }
   } else {

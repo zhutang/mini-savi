@@ -465,17 +465,25 @@ write_satellites_geom(const Constellation * pconstellation)
 	s = sl->s;
 	if (sl->s->can_display_satellite) {
 	  if (use_box_satellite) {
-	    fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+	      fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+		    s->tag ? box_special_hname : box_hname);
+        printf("{INST transform:trans_%d geom:%s}\n", s->id,
 		    s->tag ? box_special_hname : box_hname);
 	  } else if (use_planes_satellite) {
-	    fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+	      fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+		    s->tag ? planes_special_hname : planes_hname);
+        printf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
 		    s->tag ? planes_special_hname : planes_hname);
 	  } else if (use_sphere_satellite) {
-	    fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+	      fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+		    s->tag ? sphere_special_hname : sphere_hname);
+        printf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
 		    s->tag ? sphere_special_hname : sphere_hname);
 	  } else {
-	    /* use fancy satellite */
-	    fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+	      /* use fancy satellite */
+	      fprintf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
+		    s->tag ? fancy_special_hname : fancy_hname);
+        printf(gv_out, "{INST transform:trans_%d geom:%s}\n", s->id,
 		    s->tag ? fancy_special_hname : fancy_hname);
 	  }
 	}
@@ -490,90 +498,99 @@ write_satellites_geom(const Constellation * pconstellation)
 
       /* write out all viewable satellites as a single VECT */
       if (num_view_sats > 0) {
-       if (GV_BINARY_FORMAT_AVAILABLE) {
-	uint32_t ibuf[3];
-	float fbuf[3];
-	float rgba[] = { 0, 1, 0, 1 };	/* green */
-	uint16_t zero_one_buf[] = { 0, 1 };
-	uint16_t *zero = zero_one_buf;
-	uint16_t *one = zero_one_buf + 1;
+          if (GV_BINARY_FORMAT_AVAILABLE) {
+            uint32_t ibuf[3];
+            float fbuf[3];
+            float rgba[] = { 0, 1, 0, 1 };	/* green */
+            uint16_t zero_one_buf[] = { 0, 1 };
+            uint16_t *zero = zero_one_buf;
+            uint16_t *one = zero_one_buf + 1;
 
-	/* convert stuff to big endian format */
-	htons_buffer(zero, 2);
+            /* convert stuff to big endian format */
+            htons_buffer(zero, 2);
 
-	/* send VECT header */
-	gv_send("{appearance {linewidth 7} VECT BINARY\n");
-	/* send: n_view_sats n_view_sats 1 */
-	ibuf[0] = ibuf[1] = num_view_sats;
-	ibuf[2] = 1;
-	htonl_buffer(ibuf, 3);
-	gv_send_binary_ints(ibuf, 3);
-	/* send n_view_sats number of short 1s */
-	for (i = 0; i < num_view_sats; i++) {
-	  gv_send_binary_shorts(one, 1);
-	}
-	/* send short 1 followed by n_view_sats-1 number of short 0s */
-	gv_send_binary_shorts(one, 1);
-	for (i = 1; i < num_view_sats; i++) {
-	  gv_send_binary_shorts(zero, 1);
-	}
-	/* for each satellite to view, send 3 floats describing position */
-	for (sl = pconstellation->satellites; NULL != sl; sl = sl->next) {
-	  s = sl->s;
-	  if (s->can_display_satellite) {
-	    fbuf[0] = s->transform[3][0];
-	    fbuf[1] = s->transform[3][1];
-	    fbuf[2] = s->transform[3][2];
-	    htonl_buffer((uint32_t *) fbuf, 3);
-	    gv_send_binary_floats(fbuf, 3);
-	  }
-	}
-	/* send color */
-	htonl_buffer((uint32_t *) rgba, 4);
-	gv_send_binary_floats(rgba, 4);
-	gv_send("}\n");
-       } else {
-	gv_send("{appearance {linewidth 7} VECT\n");
-	fprintf(gv_out, "%d %d 1\n", num_view_sats, num_view_sats);
-	for (i = 0; i < num_view_sats; i++) {
-	  gv_send("1 ");
-	}
-	gv_send("\n1 ");
-	for (i = 1; i < num_view_sats; i++) {
-	  gv_send("0 ");
-	}
-	gv_send("\n");
-	for (sl = pconstellation->satellites; NULL != sl; sl = sl->next) {
-	  s = sl->s;
-	  if (s->can_display_satellite) {
-	    fprintf(gv_out, "%f %f %f\n", s->transform[3][0],
-		    s->transform[3][1], s->transform[3][2]);
-	  }
-	}
-	gv_send("0 1 0 1}\n");
+            /* send VECT header */
+            gv_send("{appearance {linewidth 7} VECT BINARY\n");
+            /* send: n_view_sats n_view_sats 1 */
+            ibuf[0] = ibuf[1] = num_view_sats;
+            ibuf[2] = 1;
+            htonl_buffer(ibuf, 3);
+            gv_send_binary_ints(ibuf, 3);
+            /* send n_view_sats number of short 1s */
+            for (i = 0; i < num_view_sats; i++) {
+              gv_send_binary_shorts(one, 1);
+            }
+            /* send short 1 followed by n_view_sats-1 number of short 0s */
+            gv_send_binary_shorts(one, 1);
+            for (i = 1; i < num_view_sats; i++) {
+              gv_send_binary_shorts(zero, 1);
+            }
+            /* for each satellite to view, send 3 floats describing position */
+            for (sl = pconstellation->satellites; NULL != sl; sl = sl->next) {
+              s = sl->s;
+              if (s->can_display_satellite) {
+                fbuf[0] = s->transform[3][0];
+                fbuf[1] = s->transform[3][1];
+                fbuf[2] = s->transform[3][2];
+                htonl_buffer((uint32_t *) fbuf, 3);
+                gv_send_binary_floats(fbuf, 3);
+              }
+            }
+            /* send color */
+            htonl_buffer((uint32_t *) rgba, 4);
+            gv_send_binary_floats(rgba, 4);
+            gv_send("}\n");
+          } else {
+                gv_send("{appearance {linewidth 7} VECT\n");
+                fprintf(gv_out, "%d %d 1\n", num_view_sats, num_view_sats);
+                printf("%d %d 1\n", num_view_sats, num_view_sats);
+                fprintf(gv_out, "%d %d 1\n", num_view_sats, num_view_sats);
+                printf("%d %d 1\n", num_view_sats, num_view_sats);
+                for (i = 0; i < num_view_sats; i++) {
+                  gv_send("1 ");
+                }
+                gv_send("\n1 ");
+                for (i = 1; i < num_view_sats; i++) {
+                  gv_send("0 ");
+                }
+                gv_send("\n");
+                for (sl = pconstellation->satellites; NULL != sl; sl = sl->next) {
+                  s = sl->s;
+                  if (s->can_display_satellite) {
+                    fprintf(gv_out, "%f %f %f\n", s->transform[3][0],
+                      s->transform[3][1], s->transform[3][2]);
+                    printf("%f %f %f\n", s->transform[3][0],
+                      s->transform[3][1], s->transform[3][2]);
+                  }
+                }
+                gv_send("0 1 0 1}\n");
        }
       }
 
       /* write out any tagged satellites */
       if (num_tag_sats > 0) {
-	fprintf(gv_out, "{appearance {linewidth 15} VECT\n%d %d 1\n",
-		num_tag_sats, num_tag_sats);
-	for (i = 0; i < num_tag_sats; i++) {
-	  gv_send("1 ");
-	}
-	gv_send("\n1 ");
-	for (i = 1; i < num_tag_sats; i++) {
-	  gv_send("0 ");
-	}
-	gv_send("\n");
-	for (sl = pconstellation->satellites; NULL != sl; sl = sl->next) {
-	  s = sl->s;
-	  if (s->tag) {
-	    fprintf(gv_out, "%f %f %f\n", s->transform[3][0],
-		    s->transform[3][1], s->transform[3][2]);
-	  }
-	}
-	gv_send("1 1 0 1}\n");
+          fprintf(gv_out, "{appearance {linewidth 15} VECT\n%d %d 1\n",
+            num_tag_sats, num_tag_sats);
+          printf("{appearance {linewidth 15} VECT\n%d %d 1\n",
+            num_tag_sats, num_tag_sats);
+            for (i = 0; i < num_tag_sats; i++) {
+            gv_send("1 ");
+          }
+          gv_send("\n1 ");
+          for (i = 1; i < num_tag_sats; i++) {
+            gv_send("0 ");
+          }
+          gv_send("\n");
+          for (sl = pconstellation->satellites; NULL != sl; sl = sl->next) {
+            s = sl->s;
+            if (s->tag) {
+              fprintf(gv_out, "%f %f %f\n", s->transform[3][0],
+                s->transform[3][1], s->transform[3][2]);
+              printf("%f %f %f\n", s->transform[3][0],
+                s->transform[3][1], s->transform[3][2]);
+            }
+          }
+          gv_send("1 1 0 1}\n");
       }
 
       /* close LIST object */

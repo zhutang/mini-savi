@@ -31,7 +31,7 @@ proc main(build) {} {
 
     wm protocol $main_name WM_DELETE_WINDOW main(exit)
 
-    wm title $main_name "$TITLE - satellite constellation visualization"
+    wm title $main_name "Mini-$TITLE - Realistic Satellite Network Simulation Platform"
 
     build_Menubar $main_name mbar \
 	{"Help" \
@@ -59,6 +59,7 @@ proc main(build) {} {
     if {$geomview_module == 0} {
 	build_Menu $main_name.mbar.b0 \
 	    {"Load more satellites..." "load(build)"} \
+        {"run mininet..." "run_mininet"} \
 	    {"Save satellites as Tcl script..." "save(build)" "S"} \
 	    {} \
             {"Load new constellation TLEs from web..." "load_url_tle(build)"} \
@@ -163,6 +164,11 @@ proc main(build) {} {
 
 }
 
+#added by tz
+proc sleep {N} {
+    after [expr {int($N * 1000)}]
+}
+
 proc main(start_satellites) {} {
     global first_filename last_filename source_comments comments_text comments_file details_source
 
@@ -180,13 +186,13 @@ proc main(start_satellites) {} {
 proc main(reset_title) {} {
   global TITLE main_name
 
-  wm title $main_name "$TITLE - satellite constellation visualization"
+  wm title $main_name "Mini-$TITLE - Realistic Satellite Network Simulation Platform"
 }
 
 proc main(title) {filename} {
   global TITLE main_name
 
-  wm title $main_name "$TITLE - $filename - satellite constellation visualization"
+  wm title $main_name "Mini-$TITLE - $filename - Realistic Satellite Network Simulation Platform"
 }
 
 proc main(constellations_menu) {submenu} {
@@ -203,7 +209,9 @@ proc main(constellations_menu) {submenu} {
 	{"Quasi-geostationary" "main(constellation) quasi-geo.tcl"} \
 	{} \
 	{"Globalstar" "main(constellation) globalstar.tcl"} \
-	{"Iridium" "main(constellation) iridium-66.tcl"} \
+	{"Iridium-66" "main(constellation) iridium-66.tcl"} \
+	{"Iridium-110" "main(constellation) iridium-110.tcl"} \
+	{"Starlink-con5" "main(constellation) starlink-con5.tcl"} \
 	{"Orbcomm" "main(constellation) orbcomm.tcl"} \
 	{"Sirius Radio elliptical" "main(constellation) sirius-radio.tcl"} \
 	{"DMC disaster monitoring" "main(constellation) dmc.tcl"} \
@@ -298,6 +306,7 @@ proc main(back_step) {} {
 
 proc main(forwards) {} {
     global COLOR playbar
+    global chan
 
     satellites STOP
     if {("OK" == [satellites FORWARDS]) && ([winfo exists .main])} {
@@ -311,6 +320,10 @@ proc main(forwards) {} {
 	coverage(forwards)
     }
     set playbar 0
+
+    #to mini-savi
+    puts $chan "forwards"
+    flush $chan
 }
 
 proc main(backwards) {} {
@@ -332,6 +345,7 @@ proc main(backwards) {} {
 
 proc main(stop) {} {
     global COLOR playbar
+    global chan
 
     if {("OK" == [satellites STOP]) && ([winfo exists .main])} {
 	.main.bb1.b3 configure -bg $COLOR(sbg) -highlightbackground $COLOR(sbg)
@@ -345,13 +359,21 @@ proc main(stop) {} {
 	coverage(stop)
     }
     set playbar 0
+
+    #to mini-savi
+    puts $chan "stop"
+    flush $chan
 }
 
 proc main(restart) {} {
-
+    global chan
+    
     main(stop)
     satellites RESET
 
+    #to mini-savi
+    puts $chan "restart"
+    flush $chan
 }
 
 proc main(exit) {} {
@@ -372,18 +394,33 @@ proc main(exit) {} {
 
 proc main(update) {} {
     global sun_flag
+    global chan
 
     # 0 shows sunlight
     set i 0
 
     set n [.main.cmd.lb size]
 
+    puts satellites
+
+    #to mini-savi
+    set chan [socket 127.0.0.1 12345]
+    puts $chan "constellation import start"
+    flush $chan
+    sleep 1
+
     while {[satellites GET $i] != ""} {
-        main(update_field) $i
-	incr i
+        main(update_field) $i $chan
+        incr i
     }
+
+    #to mini-savi
+    puts $chan "constellation import end"
+    flush $chan
+    sleep 1
+
     if {$n > 0} {
-	.main.cmd.lb delete $i [expr $i+$n-1]
+        .main.cmd.lb delete $i [expr $i+$n-1]
     }
 
     if {!$sun_flag} {
@@ -395,7 +432,7 @@ proc main(update) {} {
     coverage(update)
 }
 
-proc main(update_field) {i} {
+proc main(update_field) {i chan} {
 
     set noe [satellites GET $i]
     set name [satellites GET_NAME $i]
@@ -415,7 +452,14 @@ proc main(update_field) {i} {
     regsub {\{} $line "" line
     regsub {\}} $line "" line
 
+    #add by tz
+    puts "line: $line"
+
     .main.cmd.lb insert $i $line
+
+    #to mini-savi
+    puts $chan $line
+    flush $chan
 }
 
 proc main(show_sunlight) {} {
@@ -680,28 +724,34 @@ proc main(source_file) {filename} {
     set f [open "$filename" r]
     set source_comments ""
     while {[gets $f line] >= 0} {
-	set line [string trim $line]
-	if {[string index $line 0] == "\#"} {
-	    set length [string length "$line"]
-	    if {[string index $line 2] == "*"} {
-		if {$length > 3} {
-		    set line [string range "$line" 4 $length]
-		    if {([string index $line 0] == " ")||($block_end == 1)} {
-			set source_comments "$source_comments\n$line "
-			set block_end 0
-		    } else {
-			set source_comments "$source_comments$line "
-		    }
-		} else {
-		    set source_comments "$source_comments\n\n"
-		}
-	    } else {
-		set block_end 1
-	    }
-	}
+        puts stderr "$line\n\n"
+        set line [string trim $line]
+        if {[string index $line 0] == "\#"} {
+            set length [string length "$line"]
+            if {[string index $line 2] == "*"} {
+                if {$length > 3} {
+                    set line [string range "$line" 4 $length]
+                    if {([string index $line 0] == " ")||($block_end == 1)} {
+                        set source_comments "$source_comments\n$line "
+                        set block_end 0
+                    } else {
+                        set source_comments "$source_comments$line "
+                    }
+                } else {
+                    set source_comments "$source_comments\n\n"
+                }
+            } else {
+                set block_end 1
+            }
+        }
     }
+
     close $f
     set details_source "$filename"
+
+    # add by tz
+    puts stderr "$details_source"
+
 
     puts stderr "\nSaVi: loaded $filename"
 
@@ -709,10 +759,10 @@ proc main(source_file) {filename} {
         puts stderr "      changed minimum transmit altitude from $min_transmit_altitude_old to $min_transmit_altitude km."
     }
     if {$coverage_angle != $coverage_angle_old} {
-	puts stderr "      changed coverage angle from $coverage_angle_old to $coverage_angle degrees."
-	if {$coverage_angle_flag} {
-	    puts stderr "      Coverage angle probably describes mask elevation."
-	}
+        puts stderr "      changed coverage angle from $coverage_angle_old to $coverage_angle degrees."
+        if {$coverage_angle_flag} {
+            puts stderr "      Coverage angle probably describes mask elevation."
+        }
     }
 
     geomview(update_texture)
@@ -724,8 +774,8 @@ proc main(load_file) {filename} {
 
 
     if {![file exists "$filename"]} {
-	puts stderr "\nSaVi: could not find $filename"
-	return
+        puts stderr "\nSaVi: could not find $filename"
+        return
     }
 
     if {$geomview_module == 1} {
@@ -733,20 +783,20 @@ proc main(load_file) {filename} {
     }
     # if filename ends in ".tle" then interpret as a two-line-element file
     if {[string_ends "$filename" ".tle"]} {
-	set last_filename "$filename"
-	# tle file
+        set last_filename "$filename"
+        # tle file
         # if sunlight is on should really turn it off as misleading.
-	tle_file_input "$filename"
+        tle_file_input "$filename"
     } elseif {[string_ends "$filename" ".tcl"]} {
-	set last_filename "$filename"
-	main(source_file) "$filename"
+        set last_filename "$filename"
+        main(source_file) "$filename"
     } else {
-	puts stderr "\nSaVi: $filename is not a recognised .tle/.tcl satellites file."
-	puts stderr "      No satellites loaded."
+        puts stderr "\nSaVi: $filename is not a recognised .tle/.tcl satellites file."
+        puts stderr "      No satellites loaded."
     }
 
     if {$geomview_module == 1} {
-	geomview(update_texture)
+    	geomview(update_texture)
         satellites GV_SEND "(ui-freeze off)"
     }
 

@@ -146,6 +146,8 @@ gv_send(const char *buf)
   if (!geomview_module)
     return;
   fprintf(gv_out, "%s", buf);
+  //add by tz
+  printf("%s", buf);
 }
 
 /*
@@ -193,6 +195,8 @@ void
 gv_send_binary_ints(const uint32_t *buf, unsigned int n)
 {
   fwrite((const void *) buf, 4, n, gv_out);
+  //add by tz
+  printf("%ld", buf);
 }
 
 /*
@@ -206,6 +210,8 @@ void
 gv_send_binary_shorts(const uint16_t *buf, unsigned int n)
 {
   fwrite((const void *) buf, 2, n, gv_out);
+    //add by tz
+  printf("%d", buf);
 }
 
 /*
@@ -220,6 +226,8 @@ void
 gv_send_binary_floats(const float *buf, unsigned int n)
 {
   fwrite((const void *) buf, 4, n, gv_out);
+    //add by tz
+  printf("%f", buf);
 }
 
 /*
@@ -262,6 +270,8 @@ gv_begin()
 
   if (0 == progn_depth++) {
     fprintf(gv_out, "(progn\n");
+      //add by tz
+      printf("(progn\n");
   }
 }
 
@@ -275,6 +285,8 @@ gv_start()
 
   if (0 == progn_depth++) {
     fprintf(gv_out, "(progn\n");
+          //add by tz
+      printf("(progn\n");
   }
 }
 
@@ -295,6 +307,10 @@ gv_end()
   if (--progn_depth == 0) {
     gv_delayed_view_update();
     fprintf(gv_out, ")\n");
+
+          //add by tz
+      printf("(progn\n");
+
     fflush(gv_out);
   } else if (progn_depth < 0) {
     error("gv_end() called more than gv_begin()! Nesting symmetry broken.");
@@ -316,6 +332,9 @@ gv_stop()
 
   if (--progn_depth == 0) {
     fprintf(gv_out, ")\n");
+          //add by tz
+      printf(")\n");
+
     fflush(gv_out);
   } else if (progn_depth < 0) {
     error("gv_stop() called too often! Nesting symmetry broken.");
@@ -334,10 +353,20 @@ gv_transform(const char *name, double m[4][4])
   unsigned int i, j;
 
   fprintf(gv_out, "(read transform {transform define %s\n", name);
+  
+  //add by tz
+  printf("(read transform {transform define %s\n", name);
+
   for (i = 0; i < 4; i++)
     for (j = 0; j < 4; j++)
-      fprintf(gv_out, "%g ", m[i][j]);
+    {
+        fprintf(gv_out, "%g ", m[i][j]);
+        //add by tz
+        printf("%g ", m[i][j]);
+    }
   fprintf(gv_out, "})\n");
+    //add by tz
+    printf("})\n");
 }
 
 /*
@@ -351,6 +380,9 @@ gv_create_geom(const char *name, const char *tname, const char *hname)
 {
   fprintf(gv_out, "(geometry %s { INST transform :%s geom :%s} )\n",
 	  name, tname, hname);
+    //add by tz
+    printf( "(geometry %s { INST transform :%s geom :%s} )\n",
+	  name, tname, hname);
 }
 
 /*
@@ -362,6 +394,8 @@ void
 gv_create_geomh(const char *name, const char *hname)
 {
   fprintf(gv_out, "(geometry %s { :%s } )\n", name, hname);
+      //add by tz
+    printf("(geometry %s { :%s } )\n", name, hname);
 }
 
 /*
@@ -373,6 +407,8 @@ void
 gv_create_alienh(const char *name, const char *hname)
 {
   fprintf(gv_out, "(new-alien %s { :%s } )\n", name, hname);
+      //add by tz
+    printf("(new-alien %s { :%s } )\n", name, hname);
 }
 
 
@@ -386,6 +422,8 @@ void
 gv_delete_geom(const char *name)
 {
   fprintf(gv_out, "(delete %s)\n", name);
+      //add by tz
+    printf("(delete %s)\n", name);
 }
 
 /*
@@ -397,6 +435,8 @@ void
 gv_delete_handle(const char *name)
 {
   fprintf(gv_out, "(read geometry {define %s {} })\n", name);
+      //add by tz
+    printf("(read geometry {define %s {} })\n", name);
 }
 
 
@@ -411,9 +451,13 @@ gv_ui_freeze(int flag)
 {
   if (!flag) {
     fprintf(gv_out, "(ui-freeze off)\n");
+        //add by tz
+    printf("(ui-freeze off)\n");
     fflush(gv_out);
   } else {
     fprintf(gv_out, "(ui-freeze on)\n");
+        //add by tz
+    printf("(ui-freeze on)\n");
   }
 }
 
@@ -426,6 +470,8 @@ gv_set_ready()
   if (gv_ack)
     return;
   fprintf(gv_out, "(echo \"\\n\")\n");
+      //add by tz
+    printf("(echo \"\\n\")\n");
   fflush(gv_out);
   gv_ack = TRUE;
 }

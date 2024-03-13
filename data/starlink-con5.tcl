@@ -38,17 +38,14 @@
 
 # $Id: iridium-66.tcl,v 1.13 2016/08/16 02:02:59 lloydwood Exp $
 
-#set SATS_PER_PLANE 11
-set SATS_PER_PLANE 3
-#set NUM_PLANES 6
-set NUM_PLANES 2
-set INTERPLANE_SPACING 31.6
+set SATS_PER_PLANE 43
+set NUM_PLANES 4
+set INTERPLANE_SPACING 45
 
 # setup orbital elements
-#set a [expr 780.0+$RADIUS_OF_EARTH]
-set a [expr 1780.0+$RADIUS_OF_EARTH]
+set a [expr 560.0+$RADIUS_OF_EARTH]
 set e 0.0
-set inc 86.4
+set inc 97.6
 set omega 0.0
 
 set coverage_angle 8.2
@@ -67,7 +64,7 @@ for {set j 0} {$j < $NUM_PLANES} {incr j} {
 			set plane_offset [expr $T_per / $SATS_PER_PLANE / 2.0]
 		}
 		set T [expr $T_per * $i / $SATS_PER_PLANE + $plane_offset]
-		set n [satellites LOAD $a $e $inc $Omega $omega $T "Iridium ($j, $i)"]
+		set n [satellites LOAD $a $e $inc $Omega $omega $T "Starlink ($j, $i)"]
 		if {$i > 0} {satellites ORBIT_SET $n 0}
 	}
 }

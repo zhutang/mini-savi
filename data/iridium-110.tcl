@@ -38,15 +38,12 @@
 
 # $Id: iridium-66.tcl,v 1.13 2016/08/16 02:02:59 lloydwood Exp $
 
-#set SATS_PER_PLANE 11
-set SATS_PER_PLANE 3
-#set NUM_PLANES 6
-set NUM_PLANES 2
+set SATS_PER_PLANE 11
+set NUM_PLANES 10
 set INTERPLANE_SPACING 31.6
 
 # setup orbital elements
-#set a [expr 780.0+$RADIUS_OF_EARTH]
-set a [expr 1780.0+$RADIUS_OF_EARTH]
+set a [expr 780.0+$RADIUS_OF_EARTH]
 set e 0.0
 set inc 86.4
 set omega 0.0
