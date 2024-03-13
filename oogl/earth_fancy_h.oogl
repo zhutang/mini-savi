@@ -1,0 +1,1 @@
+(read geometry { define earth_h < "$SAVI/oogl/earth_fancy.oogl" })

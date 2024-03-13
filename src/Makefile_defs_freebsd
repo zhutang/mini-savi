@@ -1,0 +1,64 @@
+#
+# Makefile_defs_freebsd
+#
+# You must modify tcl/Makefile to call tclsh8.5 where indicated.
+
+# Definitions which first worked for FreeBSD 6.0 using Tcl/Tk 8.4
+# tested at Swinburne CAIA, Melbourne, with thanks to
+# Lawrence Stewart (lstewart@room52.net).
+# Now updated to Tcl/Tk 8.5 for FreeBSD 8.1.
+#
+# The FreeBSD ports install of Tcl and Tk seems to call everything
+# blahN.N where N.N is the version number. So, you run
+# e.g. tclsh8.5. Naming of libraries, e.g. -ltk85, is similar.
+
+# Always run make ARCH=platform from the top-level savi directory.
+#
+# $Id: Makefile_defs_freebsd,v 1.7 2011/08/07 06:58:38 lloydwood Exp $
+
+
+########################################################
+#                                                      #
+# Set machine type -- suffix for savi                  #
+#                                                      #
+########################################################
+MACH = freebsd
+
+########################################################
+#                                                      #
+# set CC to an ANSI C compiler                         #
+#                                                      #
+########################################################
+CC = gcc
+
+########################################################
+#                                                      #
+# set TCL_INCLUDES so that the compiler can            #
+# find the tcl.h and tk.h                              #
+#                                                      #
+# If tcl/tk is installed in a standard place           #
+# it is not necessary to set this. You may need to     #
+# change the numbers to match your version of tcl/tk.  #
+# The numbers in the topmost savi script should also   #
+# match.                                               #
+#                                                      #
+########################################################
+TCL_INCLUDES = -I/usr/local/include/tcl8.5 -I/usr/local/include/tk8.5 -I/usr/X11R6/include
+
+########################################################
+#                                                      #
+# set TCL_LIBS so that the compiler can find           #
+# libtcl.a and libtk.a. Alter to suit - see above.     #
+#                                                      #
+########################################################
+TCL_LIBS = -ltcl85 -ltk85
+
+########################################################
+#                                                      #
+# Set OTHER_LIBS so that any other stuff needing to    #
+# be linked in will be!                                #
+#                                                      #
+########################################################
+OTHER_LIBS = -L/usr/local/lib
+#-ldl
+# OTHER_LIBS = -static

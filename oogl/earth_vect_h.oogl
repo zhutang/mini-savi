@@ -1,0 +1,28 @@
+# SaVi by Robert Thurman (thurman@geom.umn.edu) and
+#         Patrick Worfolk (worfolk@alum.mit.edu).
+#
+# Copyright (c) 1997 by The Geometry Center.
+# This file is part of SaVi.  SaVi is free software;
+# you can redistribute it and/or modify it only under
+# the terms given in the file COPYRIGHT which you should
+# have received along with this file.  SaVi may be
+# obtained from:
+# http://savi.sourceforge.net/
+# http://www.geom.uiuc.edu/locate/SaVi
+
+
+# Earth sphere and vector map descriptions.
+
+# $Id: earth_vect_h.oogl,v 1.8 2011/04/26 20:41:31 lloydwood Exp $
+
+(read geometry { define earth_vect_h < "$SAVI/oogl/earth.vect"
+} )
+
+(read geometry { define earth_vect_clear_h { LIST
+	{ appearance { material { edgecolor 0.6 0.6 1 } }
+	{: earth_vect_h}
+	} } } )
+
+(read geometry { define earth_vect_sphere_h {
+	LIST {: unit_sphere_h} {: earth_vect_h}
+	} } )

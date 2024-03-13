@@ -1,0 +1,1002 @@
+BUGS recognized in SaVi
+=======================
+$Id: BUGS,v 1.252 2017/06/10 07:35:57 lloydwood Exp $
+
+This list of BUGS describes caveats and problems with
+use of the SaVi satellite visualization software.
+
+This document contains the following sections:
+
+1. Caveats in use of SaVi. Be aware of these.
+
+2. Platform-specific issues.
+   a. Mac OS X
+       i. Mac compilation hints
+          -- for SaVi
+          -- for Geomview
+       ii. 10.5 (Leopard)-specific issues
+          -- for SaVi
+          -- for Geomview
+       iii. Other minor Mac-specific issues
+          -- for SaVi
+          -- for Geomview
+   b. Cygwin on Microsoft Windows
+          -- for SaVi
+          -- for Geomview
+
+3. A detailed SaVi wishlist. Notes on issues in these SaVi releases.
+   a. Coding and build issues
+   b. Scalability
+   c. Scriptability
+   d. User interface
+   e. Coverage view improvements
+   f. Fisheye view improvements
+   g. Geomview interaction
+   h. Dynamic texturemapping with Geomview
+   i. Various
+   j. Interaction with other 3D renderers
+   k. Interaction with the network simulator ns
+   l. Desirable constellations to simulate
+
+4. Remaining integration work from unreleased SaVi 1.1.
+
+5. Remaining items from the original SaVi 1.0 wishlist.
+
+
+
+1. CAVEATS IN USE OF SAVI
+=========================
+
+Changing default simulation parameters (central body radius,
+gravity, etc.) can cause unexpected behaviour; scripts generally
+describe satellites in circular orbits via an altitude above the
+body's surface. Use at own risk. If simulating a different planet
+to Earth, we should force the -orbit-model J0 flag to avoid
+simulating Earth's oblateness and environment. J0/J2 should be
+selectable in the params dialog. Any changes should reset time
+to zero - with a warning.
+
+Two-line-element (TLE or 'elset') reading and constellation code
+in tcl/constellations.tcl still needs considerable work. Reading
+.tle files is experimental. This is not guaranteed for multiple
+satellites of different epochs, so you can't really just expect to
+download a .tle file, load it in and go.
+Improving this and introducing clock time would make SaVi far more
+practical.
+(Sidereal time and the Earth's motion around the sun is not
+simulated; noted by Tom Tessier.)
+
+Selection: selected satellite is not visible as selected in Geomview
+until a marker type is first selected or satellite orbital elements
+are edited. Operations on multiple satellites (e.g. Cut) only work
+on the last satellite selected.
+
+Sunlight is approximated by having the sun orbit the Earth as a
+distant satellite with the appropriate year-long period. This
+should not be done as a J2 calculation, but should at least be J0.
+Geomview's lighting rendering needs to be fixed to match this
+coverage footprint.
+
+
+
+2. PLATFORM-SPECIFIC ISSUES
+===========================
+
+a. MAC OS X
+
+i. Mac compilation hints
+
+-- for SaVi
+
+SaVi and Geomview need Xcode (included in Developer Tools with the
+Mac OS X system installer copy, or downloadable from Apple) to provide
+the tools that can compile these and other programs.
+
+As of Mac OS X 10.7, Xcode is now an app available from the Mac App
+Store. As well as downloading and installing the Xcode app, it may be
+necessary to explicitly enable command-line tools so that e.g. gcc
+is available. The command line tools must be selected in:
+Xcode > Preferences > Downloads > Components > Command Line Tools
+
+Simply typing 'make' in a Terminal window may generate a dialog to
+install the app and necessary command-line tools. Alternatively,
+the command-line tools can be installed by typing:
+    xcode-select --install
+
+Although recent releases of Mac OS X include Tcl/Tk headers, they do
+not include the X11 headers that Tk needs to compile. One way to
+get these headers is to install the XQuartz package from
+http://www.xquartz.org/
+The XQuartz copies of X11 headers are looked for during compilation.
+
+The Tcl/Tk libraries shipped with Mac OS X releases have some
+user-interface problems and are prone to crashing. It is preferable
+to install a later ActiveTcl release from
+    http://www.activestate.com/activetcl
+and then choose to build with that instead; to do so, uncomment the
+second, commented, TCL_LIBS = line in src/Makefile_defs_macosx
+before compiling savi by typing
+    make ARCH=macosx
+
+Mac Tcl issues fixed in ActiveTcl include:
+- Mac OS X 10.5 Leopard menu problems
+- accelerator key crashes
+- coverage panel angle slider crashing Tcl due to a busy event loop
+  when texturemapping, cone and footprint drawing are on.
+
+-- for Geomview
+
+On Mac OS X 10.8 or later, you will need to install XQuartz from
+http://www.xquartz.org/ to provide an X11 environment.
+
+To build Geomview on Mac OS X, you must first install a Motif clone
+such as Lesstif (available via www.geomview.org's Downloads section).
+In Lesstif's directory you will need to
+    configure
+    make
+    sudo make install
+and okay the sudo with a password to place Motif files where Geomview
+expects to find them.
+
+Geomview works well with OpenGL, but the OpenGL header files needed
+are not included in Xcode by default. They were an extra optional
+package provided with the Mac OS X system installer. Building Geomview
+with
+    ./configure --without-opengl
+    make
+is a fast way to get started, but the OpenGL rendering is recommended
+for coverage texturemapping. To build Geomview with OpenGL once
+these optional header files are installed:
+    ./configure --with-opengl=/usr/X11R6
+    make
+
+and then optionally to make Geomview available from the command line
+everywhere:
+    sudo make install
+
+
+ii. 10.5 (Leopard)-specific issues
+
+-- for SaVi
+
+The Tk 8.4.7 supplied with Mac OS X 10.5 (Leopard) has problems
+displaying SaVi's menubar.
+
+To work around this, menu buttons can be put in each SaVi window with:
+    savi -redrawn-menus
+This is not required on Mac OS X 10.6 (Snow Leopard) or 10.4 (Tiger),
+where the Mac menubar can be used correctly.
+
+The ./savi launch script attempts to detect 10.5, and adds the
+-redrawn-menus flag to make SaVi usable for Leopard users.
+This avoids having to add the parameter at the command line each
+time SaVi is launched.
+
+Installing ActiveTcl, uncommenting the TCL_LIBS line before compiling,
+as described above, and removing the -redrawn-menus flag from the
+./savi launch script is the preferred way to work around the user
+interface problems of the Tk supplied with 10.5.
+
+-- for Geomview
+
+If doing make of Geomview fails to link at end with a
+'cycle in dylib re-exports with /usr/X11/lib/libGL.dylib'
+error, use the following single-line, no-breaks command:
+export LDFLAGS="-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib"
+then repeat the previous instructions. This problem is caused by a
+linking bug in Leopard.
+
+
+iii. Other minor Mac-specific issues
+
+-- for SaVi
+
+- Menu shortcuts are disabled on the Mac unless -redrawn-menus is
+  used. This is to prevent a freeze on using a keypress to open
+  a window (seen in 10.6 with Tk 8.5.7). 10.7 is unaffected,
+  and shortcuts can be enabled for ActiveTcl by editing disable_mac
+  in tcl/utils.tcl.
+- On compilation, two binaries are produced: bin/SaVi-macosx.bin and
+  bin/SaVi. You can rm bin/SaVi-macosx.bin to get just 'SaVi' in the
+  menubar as the application name.
+- Under the Tcl/Tk supplied with 10.5, coverage colour buttons are
+  only fully coloured when another application is frontmost.
+- Under the Tcl/Tk supplied with 10.6, menu highlight colours are
+  incorrect; highlighted text remains black.
+
+-- for Geomview
+
+- With X11 rendering, Geomview does not appear to be able to control
+  its background colour, which is always grey. OpenGL rendering is
+  fine.
+
+
+b. CYGWIN ON MICROSOFT WINDOWS
+
+32-bit Cygwin and the newer 64-bit Cygwin can coexist on a Windows PC.
+32-bit Cygwin has better Geomview interaction, and so is preferable for SaVi.
+
+If both 32-bit and 64-bit Cygwin are installed:
+- Depending on which XWin the Start menu Cygwin-X folder launches,
+  the other can be launched when that is not running by launching
+  the appropriate terminal, then typing
+    startx -- -multiwindow -clipboard &
+
+- The Task Manager will indicate whether 32-bit or 64-bit Xwin.exe
+is running.
+
+- uname -a in a terminal indicates whether that terminal is
+32-bit or 64-bit; x86_64 is 64-bit.
+
+-- for SaVi
+
+When expanding the coverage window to show a tiled coverage map, there
+can be two lines of pixels, one to the left of the map, one to the right,
+where coverage is not drawn on the background. Satellites and maps
+are drawn correctly. Oddly, this only appears under the 32-bit
+Cygwin, not in the newer 64-bit Cygwin.
+This has not been seen on any platform other than 32-bit Cygwin.
+
+-- for Geomview
+
+The SaVi/Geomview combination does not yet appear functional under
+the new 64-bit Cygwin introduced in March 2013, though 32-bit Cygwin
+is fine. Geomview experiences OpenGL and piping problems under
+64-bit Cygwin.  Use 32-bit Cygwin!
+
+Under 64-bit Cygwin, you can try building Geomview with:
+MOTIFLIBS='-lDtPrint -lMrm -lXm -lXt -lXmu -lXp -lXext -lX11 -lSM -lICE'
+./configure --with-motif=/usr --with-opengl=/usr CPPFLAGS="-DglBindTextureEXT=glBindTexture -DglDeleteTexturesEXT=glDeleteTextures"
+make
+
+
+
+3. A DETAILED SAVI WISHLIST
+===========================
+
+This is an additional wishlist of improvements for SaVi
+originally accumulated during work for the SaVi 1.2 release during
+October-November 2001, and kept up-to-date with later development.
+
+Development takes place at:
+http://personal.ee.surrey.ac.uk/Personal/L.Wood/software/SaVi/src/
+http://savi.sourceforge.net/
+
+Many suggestions (such as the user interface and fisheye
+modifications) should be straightforward if you have some Tcl/Tk/C
+experience and the spare time and interest. Others are difficult.
+
+
+
+a. CODING AND BUILD ISSUES
+
+- make install is needed. That should probably match the current debian
+  package. Early creation of it may have been able to prevent the previous
+  package problems caused by maintainers unfamiliar with the savi tree,
+  described below.
+
+- Binary packages are not created by the SaVi authors. You can always
+  download SaVi from http://savi.sf.net/ and compile it to get
+  all the files created for SaVi.
+
+- The savi-1.4.3 package available from getdeb.net from December 2009 onward
+  (and available in Ubuntu's Synaptic package manager) initially removed the
+  textfiles and manual from SaVi. This package installed SaVi under
+  /usr/share/savi, while the COPYRIGHT file was edited, renamed 'copyright'
+  and placed under /usr/share/doc/savi. This broke SaVi's help
+  system by removing all help information. Packaging was fixed in later
+  revisions. These packages were not initially compiled using zlib, although
+  and making zlib a package dependency is straightforward. More details
+  are in the PACKAGING textfile.
+
+- Cygwin support isn't seamless, and may need some editing of
+  tcl/Makefile to support the version of Tcl Cygwin uses.
+  This caveat only appears to apply to very old versions of Cygwin;
+  not Cygwin 1.5.6-1 and later.
+
+- Under cygwin, specifying -mno-cygwin to gcc in src/Makefile in
+  order to build using MinGW generates errors. We're a long way from a
+  standalone Windows executable.
+
+- $HOST or $HOSTNAME? One or both have the machine info we need
+  for the compile version info preserved in Help/About...
+
+- gv_utils.c warning: implicit declaration of functions fileno and fdopen
+  because they're POSIX, not ANSI C, even though they're normally in stdio.h;
+  could set -std=gnu99 flag to relax restriction if this mattered.
+
+- The executable bin/SaVi (named for viewing the process name, e.g. in
+  the Mac OS X menubar) is considered the same name as the savi script
+  on case-insensitive file systems (Mac OS X, Windows). This may lead
+  to confusion, particularly if src/Makefile is ever made to build in
+  the savi directory.
+
+- Improve open/close filehandling and catch errors.
+
+- Under error catching, if SaVi is launched from a terminal window
+  and backgrounded with the & metacharacter, and that terminal
+  window is then closed, writing status messages to stderr, e.g.
+  when loading a new constellation, fails due to a broken pipe.
+  The resulting Tk error dialog stalls SaVi until it is closed.
+  Option to remove ALL output sent to stdout? -quiet? Would need
+  printf varargs wrapper. Could log to file instead - but not much
+  point sans timestamps?
+
+- We should really be using snprintf instead of sprintf.
+
+- A number of readable source textfiles are mistakenly set executable.
+  This can only be fixed by altering the repository directly -
+  apparently and must be corrected when packaging.
+
+- We should examine jerkiness when used with Geomview, particularly
+  under Cygwin. utils.c::millisleep() calls select() without reference
+  to the state of the pipe to Geomview; how can this be made smarter?
+  Should we sleep after gv_end()/gv_stop() ceases nesting?
+
+- Command line handling to note what options are set should note more
+  for hint in About dialog. For debugging purposes, could allow override
+  of existing global variables by writing support for
+    -tclvar <variable1> <value> -tclvar <variable2> <value> 
+  by setting them near the end of init.tcl init code. Check existence
+  of value set and warn if not already present.
+
+- Menu shortcuts don't work while any menu is dropped down. This looks
+  like a Tcl failing crossplatform.
+
+- -fisheye and -coverage flags to spawn those windows at startup?
+  How do we set size? -large-map and -levels handles that...
+  -camera <n> to spawn n geomview cameras at startup? 2nd/3rd could
+  be north/south pole views. How to position windows on screen?
+
+- Rewrite README (for building SaVi) and README-TEXTUREMAPPING into
+  README (for building), SAVI-USE, and GEOMVIEW-USE for better online
+  help.
+
+
+
+b. SCALABILITY
+
+- Scaling up.
+  Can SaVi detect available CPU power and e.g. scale number of
+  segments in drawn orbit circles/number of sides to a coverage cone
+  appropriately for Geomview? A slider or command switch giving some
+  control over this would be very useful. Scaling up the number of
+  segments when drawing highly-elliptical orbits has been done, but
+  ORBIT_SEGMENTS defined in include/constants.h needs to be passed
+  to Tcl as a variable.
+  More use of Geomview binary format (discussed below) may help.
+
+- Scaling down.
+  Geomview rendering is optional; you can conserve CPU by running
+  SaVi standalone. SaVi 1.2 and later don't do Geomview calculations
+  when run standalone, although 1.0 did.
+  Why shouldn't Tk and a graphical display also be optional?
+  You do need a Tcl parser - that's essential - but we
+  can execute scripts to build satellites and get results; we can
+  make use of command-line switches, and we can pipe graphics to
+  stdout for a variety of uses, including building web cgis
+  (a la Chris Meenan's footprint generator).
+
+
+
+c. SCRIPTABILITY
+
+As well as scripts that get results there needs to be a
+scriptable interface to record tracefiles. Scriptable recording of
+satellite-related values over time periods would be very useful;
+the self-scheduling Tcl procedure model that is used in the
+network simulator ns2 (see below) may be worth emulating.
+
+Having Tcl/C interaction daisy-chained as keywords off the 'satellites'
+keyword is awkward, particularly for Geomview interaction, where a
+'geomview' keyword would seem more intuitive. Perhaps a 'C' keyword?
+
+
+
+d. USER INTERFACE
+
+A user manual has been written and placed in the manual/ directory,
+but more detail is needed. The manual is not yet directly
+accessible from SaVi; could SaVi find and spawn a web browser?
+
+The Tk procedures in tcl/tcl_utils.tcl (inherited from dsTool)
+are straightforward to use, but are not that efficient in
+using screen real estate. This makes SaVi cluttered, even on a
+1024x768 display. SaVi 1.2 has improved things, but this still
+needs more work.
+
+The Constellations menu needs submenus to organise and shorten it.
+These can use utils.tcl:build_PopupMenu{}, using dsTool use as a guide.
+
+
+* Main panel:
+  A realtime push-hold button next to Time Interval would be useful;
+  removes Rendering menu (->Geomview menu) when Geomview is not
+  present.  Move current time into reworked playbar line instead?
+  Cutting to remove a satellite jumps to end of (long) list, unless
+  start of list is shown.
+  Bindings are needed for cursor up/down so that satellite selection
+  moves.
+
+* Coverage panel:
+  Some wasted space here. When -large-map is selected the playbar
+  at end is drawn below the bottom of a 1024x768 screen, which
+  is a problem if you can't move windows from available edges -
+  which is why the buttons are also listed as commands in a menu.
+  Reaching the coverage angle options also becomes tricky.
+  Clicking and dragging the map sideways to shift the view would
+  be cool - esa's Space Trajectory Analysis v3.0 does this.
+  Bindings are needed for cursor left/right (forwards/back) and
+  shift-cursor left-right (single step forwards/back)
+
+* Edit satellite:
+  Dialog layout can be improved, with better alignment of captions,
+  text boxes and sliders.
+  Apply button was removed since values do update live - but does
+  that also hold for older versions of Tcl?
+  There's no easy way to select multiple satellites so that
+  you can change a checkbox setting for all of them.
+  Panel can be left open when inappropriate, e.g. when a new
+  constellation is loaded in. Should switch to editing a new
+  satellite.
+  Loading in a saved set of satellites after an existing set
+  leads to the names of the first few satellites being overwritten.
+  This is a sideeffect of satellite names being retrofitted.
+
+* Rosette and crude star generators:
+  Dialog layout can be improved, with better alignment of captions,
+  text boxes and sliders.
+  Slider positions do not update to match text value changes.
+
+
+Create overriding 'Show all {satellites | orbits | coverage }'
+checkboxes that, when checked, force related checkbox (in satellite
+Edit parameters) on and the feature visible for all satellites.
+When checked off, disable the feature for all satellites. These would
+be entries on the Rendering menu, under 'Real-time mode'.
+
+Provide menu of colour choices for highlights etc.
+
+It's possible to type into the help menu text windows. That should be
+prevented. But that is not simple in Tk: http://wiki.tcl.tk/1152
+
+Ballard/crude star generators need to create info text in "About
+constellation" window.  Look at how the initial LEO satellite text
+is created. Need to create info text separately from function that
+we may in future call from scripts that we collapsse down to Ballard?
+
+
+
+e. COVERAGE VIEW IMPROVEMENTS
+
+Now that we have satellite names, an option to show them in the
+coverage view would be useful.
+
+Could blend coverage maps somehow with the detailed map, but that
+means uncompressing it and blending on a pixel-by-pixel basis,
+or setting alpha transparency in Geomview for a coverage sphere
+over the earth sphere.
+
+Decay/sunlight options are really mutually exclusive, and could
+be done via a popup menu:
+No coverage (all-white background)
+Coverage (white background)
+Coverage and decay (default)
+Coverage and sunlight (two shades of decay)
+Coverage over land and sea (blue background)
+but we need masking for all supported projections first.
+
+Drawing the Earth map last in each rastering is nice for sending
+to Geomview earlier, where the vector Earth can be overlaid instead -
+but means that green satellite cross markers are behind and occluded
+by continent/country outlines. Ideally we have subsatellite nadir
+markers drawn by Geomview, with bitmap crosses drawn after the
+bitmap Earth maps, and not sent to Geomview either. Could fix coverage
+satellites drawn behind map bitmap outline problem. In map-drawing
+section, test value in lookup table, i.e. that it's not green,
+before plotting. Or could move loop of detect-and-draw-green-crosses
+after map drawing loop, at cost of not drawing them in Geomview.
+
+If "use sunlight" is on, why is change shading only restricted to
+land/satellite coverage only? For land/sea both should change;
+debatable for others. But labels need to update to show 1/2 sats etc.
+
+Could implement 0 satellites in view/0 intervals as two white boxes,
+not given in color swaths, but colors set individually by clicking
+buttons. Possibly better as menu option spawning color box? Set
+uncovered map color? Should intervals off default to 4+ colors, not 1?
+
+Add greyscale option for colors? diversity is white? Unless land/sea?
+
+As well as allowing coverage angles to be set per satellite, having
+multiple fooprints per satellite at set elevation angles (5 degrees,
+10 degrees) would be very useful. Either approach could be used
+to build traditional geostationary iso-coverage maps, marked out
+with diversity colours.
+
+If we close the coverage view window, we could be asked again on
+re-opening what size map we want. This means freeing memory
+and resetting pointers to null of maps and foreground, and also
+pixelPtr and c_grid. And not crashing when we do this.
+
+What is the diversity/decay value of the pixel that we have clicked?
+Report it next to fisheye lat/long coords. Unlike coords, this
+will need to be updated in real time. If fisheye is open, then we
+likely already know it from within the red circle, and can just
+repeat it in coverage? Useful reality check by comparing the two.
+
+Should opening coverage panel turn on vector Geomview map overlay?
+
+Saving maps now supports .gif, as that's integral to Tcl. Support
+for handling .png requires a non-buggy version of Tcl 8.6 or
+later, and produces larger non-indexed files, so it's not
+a menu option - but if .png is given in the filename, an
+attempt to save as .png will be made. May need to revisit
+filetypes here at some much later point.
+
+There are alternatives to plotting full circular footprints:
+- just plotting only edges of footprints - hollow circles.
+- plotting imaging swath widths, i.e. a line perpendicular to
+  the orbit inclination, width diameter footprint.
+- plotting complex spotbeams, again aligned with respect to
+  to the orbit inclination. (Chris Meenan's footprint generator
+  demonstrated hexagonal arrays.)
+This would involve making changes to e.g.
+src/stats_utils.c::fill_grid() and intensity_circle_footprint()
+
+Look at masking SaVi logo onto coverage maps - this makes most sense
+in corners of spherical and sinusoidal maps, but area used would
+need to be discounted from coverage calculations.
+
+Update all Earth maps to track more recent political boundaries.
+A couple of pixels of west Mexican coastline are missing from the
+1024 unprojected map.
+
+Consider producing better outline and landmass mask maps across
+all projections, and even new projections, by generating them
+using the d3.js map drawing functionality. Unfortunately, this
+means first understanding d3.js.
+
+The coverage slider position should be updated when a script
+loaded from the menu changes the coverage angle.
+
+A threshold altitude for enabling coverage footprints and cones
+is useful for elliptical orbits where satellites only
+transmit at apogee, but is currently only a command-line option.
+This may be more useful for a mix of orbits if specified as an
+angle around apogee, rather than as an altitude.
+
+Similar thresholds could be implemented for latitude and longitude,
+based on satellite position, and implemented as command-line options
+to start with, or a Coverage constraints coverage panel menu option.
+-coverage-latitude-max, -coverage-latitude-min,
+-coverage-longitude-max, -coverage-longitude-min, with
+-coverage-altitude-max, -coverage-altitude-min renaming the
+transmit-altitude-max/-min already implemented to fit the set.
+
+Longitude calculation for spherical fisheye clicks are inaccurate.
+Edge calculation methods have visible differences (as does
+sinusoidal). Area calculation hasn't been attempted; calculations
+of areas in general for all projections are poor estimates anyway.
+Using sinusoidal coverage map, full coverage reads from 99.6% to 99.8%
+due to rounding at curved edges of map. Coverage calculations for all
+projections are estimates at best, reflect the map projection in use
+by changing with latitude, and are limited to not exceed
+the 100% threshold. Calculations should really reflect degree of
+coverage overlap and be consistent across all views. Working
+off stats_utils.c::footprint_circle_radius() when that is computed,
+not off a distorted map, can give total coverage for each small
+circle that coverage generates. These can be summed to give
+overlapping coverage.
+
+Calculating amount of coverage overlap for 1/2/3 etc. satellites
+is possible by counting pixels, but still depends on choice of
+projection and latitude of satellite. For handling overlap, see
+Kantsiper and Weiss, An Analytic Approach to Calculating Earth
+Coverage, AAS 97-620, while they were at MIT, for an analytical
+integration approach using the inclusion/exclusion principle.
+Also Brian Kantsiper, A Systematic Approach to Station-Keeping
+of Constellations of Satellites, PhD dissertation, MIT, Feb 1998.
+See also A. Gonzalez, Measurement of areas on a sphere using
+Fibonacci and latitude-longitude lattices, Mathematical
+Geosciences, January 2010, pp. 42-49.
+http://arxiv.org/abs/0912.4540
+
+The correct way to count coverage overlap is debatable. Counting
+pixel intensities and saying X% of the earth has single satellite
+coverage, Y% of the earth has double coverage... could be useful -
+and these percentages could then be overlaid on the colour key wells.
+But counting pixels from a map still introduces some distortion.  
+
+When choosing new colour shades after animating forwards then
+stopping, the satellites move on an interval unexpectedly as
+the map is updated with new colours. Is this due to computed
+coverage finally being shown by tk_update()?
+
+Project groundtracks for the next n hours only projects forwards in
+time, even if the simulator is currently being run backwards - is
+this the least confusing approach? Enter negative number to project
+backwards.
+
+When altering the coverage map and tiling, remember to run the
+Teledesic (840) simulation to check that the top and bottom
+of the map are visible as a single line of uncovered (blue or
+white) pixels in cylindrical view. Tk does require a unit offset.
+
+Add option to fade groundtracks to background over time, just
+as interval decay works for coverage areas. When recording
+groundtracks, erase the cross arms and leave only the
+subsatellite point.
+
+Coverage areas of the selected satellite(s) can be shown in
+different shades - possibly shades of green.
+
+Add optional latitude/longitude lines. Could add equator line
+to match showing equator in fisheye view.
+
+Earth outline on sinusoidal map is drawn using different algorithm
+to backdrop. Overlap is poor; both should be drawn on the
+cached map, rather than on each coverage map drawn. This matters
+less when the backdrop is set to black to match the outline.
+
+How much work would be required to enable multiple coverage windows
+to be spawned, so that multiple projections could be seen, and
+any available cylindrical or unprojected projection is used for
+texturemapping if desired? Probably a lot.
+
+Opening the coverage window when animating means that the coverage
+playbar is not immediately updated with playbar status, and
+playbars only sync when the next playbar button is pressed.
+
+Menu options invoking popup windows to control project groundtrack,
+coverage angle slider, and minimum transmit altitude slide would
+be useful on small screens where these controls are offscreen
+at the bottom. Minimum transmit altitude is of minority interest,
+does not require slider to always be onscreen.
+
+
+
+f. FISHEYE VIEW IMPROVEMENTS
+
+Now that the fisheye window is resizable, having controls partially
+obscured at small sizes is messy. Can this be improved? (Not resizing
+the window when recording tracks would be a deliberate choice, given
+the complexity of the alternative.)
+
+New cross location in coverage map is not removed immediately when
+checkbox is turned off.
+
+Add slider to select size of fisheye crosshairs; will need to adjust
+text positioning slightly. Can we add this on buttonbar?
+
+When equatorial exclusion zone is shown, satellites are not indicated
+as within or outside it. This needs to be figured out. Equator
+altitude should be figured out from first principles in case
+simulation constants get changed and we're not simulating Earth.
+
+We support minimum elevation of the terminal, i.e. whether the
+terminal can see each satellite, but do not consider half-angle of
+the satellite, i.e. whether each satellite can see the terminal.
+Considering both would be ideal, and useful as a prelude to
+connectivity/link work.
+
+Could create fisheye orbit markers to show trajectory of currently
+selected satellite, if any. Would need to be a separate satellite
+marker list, since parallels table wraps around. Do we space markers
+in RAAN or time? Would need to cut down on satellite info to just
+the minimum and create a special marker group, then simplify equator
+code to use it? Would this even make sense with HEO orbits, where
+markers won't be spaced evenly? Could we create markers for each
+satellite as lists hanging off the Satellite in the satellites
+list? Hard to keep updated.
+
+How much work would be required to enable multiple fisheye windows
+to be spawned? Probably a lot, if pass times are to be recorded in the
+SL list structures on a per-view basis.
+
+A fisheye view that wandered (randomly?) over time would be nice
+to have, as it could show the equator and latitude lines moving
+smoothly. This would probably require a simulation event scheduler
+to be implemented so that commands could be executed on repeat
+intervals.
+
+The -debug flag outputs information about satellite positions, but it's
+verbose, showing angle to all satellites, even those below the horizon,
+and lots of debugging information for visible satellites. A decent log
+format for visible satellites and their angles above the horizon is
+needed.
+
+Saving bitmaps would be nice to have as an option. Postscript can
+always be converted to a bitmap via GhostScript:
+gs -dNOPAUSE -sDEVICE=png256 -r300x300 -sOutputFile=out.png -q -dBATCH out.ps
+but Ghostscript is a tad unwieldy, and since you'll end up cropping the
+results anyway... it's simpler to just take a screen capture.
+
+
+
+g. GEOMVIEW INTERACTION
+
+Geomview coverage cones and footprints are dynamically updated when
+the coverage view angle slider is moved. For cones, this is computationally
+laggy for large constellations. Speed it up by forcing a delay and
+scheduling a later update after a timer expires? We're already
+collapsing it in BEGIN/END. Should gv_end force a texturemap update
+for after e.g. loading a constellation?
+
+Should footprints be turned on if dynamic texturemapping and switching
+to a projection that cannot be texturemapped?
+
+Fisheye location(s) should be shown in Geomview - another colored line?
+
+Now that we have satellite names, an option to show them in Geomview
+would be useful. This would be even harder than showing in the coverage
+view - look at how The Orrery renders fonts and text.
+
+Look at altering sleep code to give longer sleeps when Geomview
+is running and animating, so that more CPU time is devoted to
+Geomview and overall performance is made more responsive.
+
+Being able to control and program camera position, to e.g. show
+exactly what a satellite sees at nadir as the satellite moves,
+would be very useful to have.
+
+Geomview's light source positioning appears to be buggy at present,
+as shown by savi -geomview -sun-lighting. Could implement a
+terminator plane at right angles to the sun pointer, reusing
+equatorial plane code.
+
+Quitting SaVi as a Geomview module can leave the blue Earth sphere
+behind. This was identified as a bug in Geomview exposed by chosen
+-O3 optimisation when building, which vanishes when -O2 is chosen -
+see the January 2012 geomview-users archives.
+
+Should be able to scale one or all satellites in size. Being able
+to scale one spherical satellite to large could be useful for
+simulating the Moon. But would need to match position to J2 model.
+
+Rotation of satellite markers as they approach the poles is inaccurate;
+detailed satellite solar panels should be at right angles to the
+ecliptic and rotate to follow the sun (if there's a sun...), rather
+than pointing east-west. (Face on to the sun at right angles to the
+ecliptic is at 67.5 degrees to the equator, which is 22.5 degrees to
+the ecliptic.)
+
+That's reality; for visualization, having panels at right angles to the
+planes increases visibility - when the planes are drawn.
+Could use inclination of orbit.
+
+Make this unwieldy SaVi/Geomview combination run in root window under
+Xscreensaver, in long tradition of overdone OpenGL hacks. To do that,
+more command switches must be passed to SaVi through Geomview.
+
+Can central blue sphere rendering be rotated so that lat/long
+lines map to barely-visible rendering of sphere segments?
+Can we draw latitude/longitude lines that rotate with the
+central body as an option? This would be like Geomview's
+'Draw Unit Sphere Projection' Camera menu option, but rotating
+with the Earth.
+
+Replace equatorial plane with more detailed sectored concentric
+circles, or with a translucent circle sized to the current
+stationary orbit as set in parameters.
+
+Can Geomview postscript output be improved and made useful by
+tweaking SaVi's oogl? This probably requires work on Geomview.
+
+Translucent surfaces (e.g. yellow selection cubes) may not
+be that visible in some renderers.
+
+Add a 'Sky view' rendering option that combines the following:
+  - switches Geomview to spherical geometry, so we're looking
+    out from the centre of the Earth;
+  - turns off central body, so that we look through outline
+    continents.
+  - turns on footprints, turns off spotbeams.
+
+On Mac OS X, Geomview does not support the Mac menubar, but
+uses its own Motif menus in its main window. This means that
+switching between SaVi and Geomview is a little disruptive
+to the user experience. This cannot be fixed only in SaVi.
+
+Check deleting central body and turning off simple earth.
+only works in one order, should work in both.
+
+Loading in constellation updates texturemapped coverage slowly.
+Because we need to change earth types?
+
+
+Geomview 1.8.1 points:
+
+These are unlikely to be dealt with, as 1.8.1 no longer
+builds with modern compilers.
+
+With Geomview 1.8.1, the large list structures used in writing
+footprints and cones cause complaints about not being able to 'seek
+back far enough in pipe.' This is related to how piping is handled,
+and the piping code rewrite by Claus-Justus Heine in Geomview 1.8.2
+release candidates for the 1.9 releases appears to have fixed this.
+An alternative to the oogl used in:
+footprints.c::write_footprints_geom()
+cones.c::write_cones_geom()
+would be good to have for remaining Geomview 1.8.1 users.
+Footprints and cones are off by default to avoid this problem.
+
+Geomview binary format is only used in one place at present (the
+default satellite marker if the architecture permits it), but
+offers a scaling advantage. Note that e.g. Geomview 1.8.0 (Linux,
+some glibc) has problems with handling binary format; selecting
+a more complicated marker type than the default green dot avoids
+use of binary format entirely, but an explicit option would be
+better.
+
+
+
+h. DYNAMIC TEXTUREMAPPING WITH GEOMVIEW
+
+Dynamic texturemapping is described in the file
+README-COVERAGE-TEXTUREMAP
+which can be found in the same directory as this BUGS file.
+
+Dynamic satellite coverage passing over the poles shows an interesting
+'circle' effect where coverage diversity appears to be evaluated once
+for the entire around-the-pole circular region. This may be dependent
+on Geomview rendering options.
+
+Coverage texturemap is not immediately updated when turning 'project
+groundtracks forward in time' on or of, so it is out of sync with
+coverage window until next animation step.
+
+
+
+i. VARIOUS
+
+Constellation generation tools should be working at a higher level -
+generating constellation to match input properties for behaviour and
+characteristics, rather than just taking orbital parameters without
+calculating parameters needed to give a desired outcome.
+
+Implement per-satellite coverage angles, as a property of each
+satellite when it is created, like the name. But global coverage
+properties for constellations are useful, and the global slider will
+be hard to give up - how do we do both? Do we need to store
+half-angle/mask setting on a per-satellite basis?
+
+Improve time display, so that groundtrack drawing has useful
+'elapsed time', and the time that the fisheye and coverage
+displays are stopped can be easily read from their respective
+windows. Average coverage display needs to count number of intervals
+sampled, since time between intervals can be changed.
+
+Implement a -start <+/- seconds> switch, so that a simulation can
+be loaded at a specific point. Also -coverage, -fisheye, -edit to open
+up the various windows on startup; can these be scripted?
+
+Allow switching between a set of default values for various planets
+(e.g. Venus, Earth, Mars) with matching surface maps, and even a
+default Constellations menu for each planet. This wuold involve
+changing the body gravity/spin defaults and possibly adding a
+finetuned special-case per-planet orbit model to handle the
+equivalent of Earth's J2 precession. A different default colour
+scheme to indicate 'not Earth' is probably also a good idea.
+A number of scripts - Clarke geostationary, Draim, possibly
+Molnya/Tundra - could compute from the defaults and generalise
+to any planet; three-satellite Mars stationary would be the first
+target. Other constellation scripts would be Earth-specific.
+
+More accurate Earth gravitational models than J2, e.g. J20, could be
+implemented via the new -orbit-model flag and the switch cases in
+orbit_utils.c::oe_time_to_oe(). Related to that, the faked 'sun'
+satellite should always be running off the simplest Keplerian J0,
+to avoid amplifying Earth oddities.
+
+Accurate gravitational models for each planet would be useful.
+Maps for each planet can be obtained from
+e.g. Stuart Levy's The Orrery for Geomview, or from
+James Hastings-Trew at http://planetpixelemporium.com/
+JHT's maps are unprojected, so require
+STSPHERE CYLINDRICAL 1 0 0 0
+rather than { : numesh_h } in oogl/earth.oogl, which means at least
+Geomview 1.9.0 for support. They're large, even once run through
+jpegtopnm and compressed, so would have to be optional.
+
+A way of drawing coverage on a translucent sphere just over the
+planet map (but just under e.g. the Earth boundary vectors) would
+be useful, so that colourful maps could be combined with coverage
+and diversity. But this needs alpha rendering support; easier to
+do the maths and mapping upfront when drawing a single coverage
+map.
+
+Makefiles, header files and #include dependencies could be much better.
+There's no attempt to optimise with judicious use of inlines as we're
+ANSI compliant, but since we spend most of our time in the Tcl
+interpreter, gains would be minimal and we can't inline functions in
+other files anyway.
+
+Adding -O2 in src/Makefile (and turning off -g debug) has produced a
+smaller and faster executable.
+
+
+
+j. INTERACTION WITH OTHER 3D RENDERERS
+
+Are there other 3D renderers with piped input for which SaVi could
+add support?
+
+An alternative is to simply render the constellation in a web browser
+using d3.js. This is shown to be possible by the animations in:
+Ashlee Vance, The New Space Race: One Man's Mission To Build
+A Galactic Internet, Bloomberg News, 23 January 2015.
+http://www.bloomberg.com/news/features/2015-01-22/the-new-space-race-one-man-s-mission-to-build-a-galactic-internet-i58i2dp6
+so scripts in Javascript would replace Tcl, and d3 driving
+the browser would replace Geomview.
+
+
+
+k. INTERACTION WITH OTHER SIMULATORS
+
+network simulator ns2 - http://www.isi.edu/nsnam/
+
+SaVi could generate output in a format suitable for Lloyd Wood's perl
+ns2 satplotscripts. This really requires working intersatellite-link
+functionality to be useful; drawing satellite positions alone doesn't
+give much over the coverage panel unless you need a postscript map.
+
+ns2 could write the simplest SaVi format that describes satellites
+(the simple Tcl scripts that SaVi saves files as...) to allow SaVi
+to show where ns2 satellites are. Over time the ns2 and SaVi simulations
+will diverge if SaVi is using the more complex J2 orbital model -
+the simpler J0 model should be preferable in this case.
+
+The default ns output format for Lloyd Wood's perl ns2
+satplotscripts describes long/lat position, but does not include
+orbital information such as altitude, making it useless for SaVi
+to simulate from files in that format as it stands. A new format
+would be needed.
+
+ns3 does not yet include satellite simulation functionality.
+
+
+
+l. DESIRABLE CONSTELLATIONS TO SIMULATE
+
+Newly-announced large satellite constellations, e.g. OneWeb, LeoSat,
+are not yet simulated well because their geometries are not known.
+Unlike the efforts of the 1990s, these have not filed public
+designs with the US FCC, and seem less open about their technical
+choices. Better simulations of these once they are public would
+be good. Details are at http://www.oneweb.net http://www.leosat.com
+
+Add a Chinese BeiDou-2 navigation constellation simulation script.
+The complete perfect BeiDou-2 constellation has five geostationary,
+three inclined geosynchronous, and 27 medium earth orbit satellites.
+
+
+
+4. REMAINING INTEGRATION WORK FROM UNRELEASED SAVI 1.1
+======================================================
+
+This work requires detailed knowledge of relevant geometry,
+satellite requirements, SaVi and Geomview in order to build on
+Patrick Worfolk's efforts.
+
+- Intersatellite link simulation in SaVi and Geomview - although
+  this really needs a good scripting interface, and must also
+  consider visibility, handoff, and configuration.
+
+
+
+5. REMAINING ITEMS FROM THE ORIGINAL SAVI 1.0 WISHLIST
+======================================================
+
+- Ability to input satellite positions correctly in two-line-element
+  format, allowing multiple satellites with different epoch
+  times to be simulated correctly simultaneously.
+
+- Incorporation of actual time into program so that the evolution
+  of real satellites can be monitored.
+
+- Full incorporation of NORAD SGP4/SDP4 propagation models for
+  NORAD two-line element sets for added realism.
+
+
+Lloyd Wood <lloydwood@users.sourceforge.net>

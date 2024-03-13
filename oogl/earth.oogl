@@ -1,0 +1,19 @@
+# $Id: earth.oogl,v 1.6 2016/09/03 06:49:39 lloydwood Exp $
+
+appearance {
+	material { diffuse 0.839 1.000 0.461 }
+#	*-evert
+#	+backcull
+	+texturing
+	shading smooth
+	texture {
+	    file "Earth.ppm.Z"
+	    transform {
+		1 0 0 0
+		0  1 0 0
+		0  0 1 0
+		.5 0 0 1
+	    }
+	}
+}
+STSPHERE RECTANGULAR 1 0 0 0

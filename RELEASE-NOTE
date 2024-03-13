@@ -1,0 +1,10 @@
+This is SaVi 1.5.1a.
+
+Release-specific changes from SaVi 1.5.1 are:
+
+- 1.5.1a updates the src/Makefile script to make
+  linking easier with gcc 10 and later
+  (adds -fcommon flag).
+
+Lloyd Wood (lloydwood@users.sourceforge.net)
+1 January 2022

@@ -1,0 +1,288 @@
+TEXTUREMAPPING IN GEOMVIEW from SaVi
+====================================
+$Id: README-COVERAGE-TEXTUREMAP,v 1.48 2016/09/03 06:49:39 lloydwood Exp $
+
+This README supplied with the SaVi satellite visualization software
+supplements the main README textfile. This contains the following sections:
+
+For SaVi and Geomview users:
+
+1. Using static Earthmap texturemapping
+   - introduction and how to turn this on.
+2. Using dynamic coverage texturemapping
+   - introduction and how to turn this on.
+3. Related command line options
+   - how to configure texturemapping to suit you.
+4. Troubleshooting problems
+   - common problems and workarounds.
+5. Enabling texturemap compression
+   - how to alter performance by decreasing the amount of data piped.
+
+For programmers interested in how texturemapping with Geomview works:
+
+6. Technical details of texturemapping
+7. Programming implementation notes.
+8. Notes on SaVi Earthmap creation.
+
+
+
+1. USING STATIC EARTHMAP TEXTUREMAPPING
+=======================================
+
+Geomview can show detailed maps of the Earth's continents. Support for
+this requires configuring and building Geomview with OpenGL - see the
+README.
+
+(Mac OS X Leopard users will also want to see the linker hint in BUGS.)
+
+To show these detailed maps, launch SaVi from Geomview and select
+either:
+a. Use simple Earth map
+b. Use detailed Earth map
+from SaVi's Rendering menu. Coverage footprints can be shown as vector
+circles over these texturemaps by turning on 'Show footprints'.
+
+The simple Earth map is SaVi's traditional blue-and-gold texture. This
+map is a cylindrical projection in oogl/Earth.ppm.gz, and is loaded by
+oogl/earth.oogl.
+
+The detailed Earth map is freely available from NASA's Blue Marble project.
+This unprojected map is in
+  oogl/blue_marble_land_shallow_topo_2048.jpeg
+and is loaded by oogl/earth_fancy.oogl and checked for by src/gv_init.c.
+Geomview requires the jpegtopnm utility, from the netpbm package
+available at http://netpbm.sourceforge.net/
+in its path to unpack this image into a less space-efficient format.
+Since that is a Geomview dependency, Geomview use is optional
+with SaVi, and use of the detailed Earth map is optional with Geomview,
+SaVi only includes the compact .jpeg file.
+
+
+
+2. USING DYNAMIC COVERAGE TEXTUREMAPPING
+========================================
+
+Geomview can show the coverage map of satellite footprints that is
+drawn in SaVi's coverage panel. This map is wrapped as a texture
+around Geomview's Earth sphere, replacing any static Earth map, and
+is updated as SaVi computes new coverage maps. Support for this
+requires configuring and building Geomview with OpenGL - see the
+README.
+
+Dynamic texturemapping of satellite coverage in Geomview requires
+SaVi's coverage panel open, to reuse the map area that that coverage
+panel draws and copy it to Geomview.
+
+The coverage map must be set to a particular projection. Geomview 1.9.0
+and later support cylindrical and unprojected projections.
+If another projection is selected that cannot be texturemapped to
+Geomview, the default static simple Earth map will be shown in Geomview.
+
+To turn on dynamic texturemapping:
+a. Launch SaVi from Geomview.
+b. Open the coverage panel window from the View menu.
+c. Turn on 'Show coverage in Geomview' in the coverage panel's
+   Rendering menu to introduce texturemapping of the coverage map to
+   Geomview's Earth sphere, so that Geomview shows in three dimensions
+   what you can see in the SaVi coverage panel in two.
+d. Animate SaVi's coverage by pressing '>>' in the coverage panel.
+
+Geomview will now show what SaVi's coverage map shows.
+
+
+
+3. RELATED COMMAND-LINE OPTIONS
+===============================
+
+There are some command-line options for SaVi that relate to and can
+improve the behaviour of this texturemapping:
+
+-dynamic-texture-with-map
+This option sends SaVi's entire coverage panel map, including the
+bitmap Earth outline, to Geomview. This takes less computing by
+Geomview than drawing the vector Earth around the sphere does, but
+doesn't look as good.  Try this flag only if performance feels
+particularly sluggish while dynamic texturemapping.
+
+-large-map
+This option resizes the coverage panel map from 600x300 to 1024x512,
+giving smoother texturemapping results in Geomview. If you have trouble
+getting Geomview to render the coverage map at one size, try the other.
+
+-map-view-height <no. of pixels>
+This option can be used to provide an even larger coverage bitmap for
+Geomview to texturemap, at the expense of Earth maps in SaVi's coverage
+panel, as the available bitmaps are not scaled to match. Smaller maps
+can also be selected to reduce the amount of computing done by SaVi and
+Geomview. Texturemap compression is recommended for sending large
+bitmaps to Geomview, as pipe use can be decreased. See
+section 5 of this document for how to enable texturemap compression.
+
+-uncompressed
+If SaVi has been compiled with zlib support (see section 5 below), this
+can be set to force uncompressed textures, ignoring zlib. Performance
+may vary between compressed and uncompressed images depending on your
+system.
+
+-gzip-compressed-textures
+If SaVi has been compiled with zlib support (see section 5 below), this
+can be set to force writing the textures with their gzip headers, which
+less recent versions of Geomview (before 1.9.5) need. SaVi will
+automatically use this method with older versions of Geomview (before
+1.9.5) for backward compatibility.
+
+
+
+4. TROUBLESHOOTING PROBLEMS
+===========================
+
+If you see a blank golden sphere in Geomview once texturemapping has
+been turned on, Geomview has attempted to load the texture, but is not
+displaying the texture. Look for error messages in the console window
+where Geomview was run. Launching SaVi from Geomview with the
+-large-map option may help, as may upgrading your OpenGL drivers and
+rebuilding Geomview.
+
+
+
+5. ENABLING TEXTUREMAP COMPRESSION
+==================================
+
+Texturemaps sent from SaVi to Geomview can be transparently compressed
+using zlib where available. This can alter performance by decreasing
+the amount of writing to, reading from, and waiting for pipe that is
+required.
+
+You can tell whether compression is working by SaVi's status messages
+in the console window where savi was launched.
+
+Transparent compression requires use of the free zlib library.
+As zlib is optional and may not be present on your system, use of zlib
+is disabled by default and must be explicitly enabled by you.
+
+If the zlib library and zlib.h are not already available
+on your system, zlib can be downloaded from http://www.zlib.net/
+and shown to work with:
+	cd zlib-1.2.8
+	./configure -s
+	make test
+Then install zlib as superuser (or get an administrator to do so) with:
+	make install
+
+Transparent compression must be selectively enabled in the SaVi code
+by editing SaVi's src/Makefile to remove the -DNO_ZLIB flag before
+recompiling SaVi after first doing 'make clean'.
+
+SaVi can tell you whether compression support was included when building
+SaVi in its About dialog from the Help menu.
+
+SaVi's support for texturemapping varies depending on the version of
+Geomview used, with the default being the newest method available
+for that version of Geomview. Older methods can be supported via
+command-line options described earlier.
+
+Geomview 1.9.x
+ - static and dynamic texturemaps are supported.
+   Compressed and uncompressed texturemaps may be piped to Geomview
+   directly.
+   Cylindrical and unprojected coverage projections are supported.
+   * Geomview 1.9.5 and later:
+     - Geomview handles decompression internally rather than spawning
+       gzip to uncompress, for a minor performance improvement.
+       Texturemaps may also be piped to Geomview using zlib's
+       compress2 (.zlib) directly without added gzip (.gz) headers,
+       which greatly simplifies coding.
+   * Geomview 1.9.0 to 1.9.4:
+     - piped compressed texturemaps are handled by spawning a gzip
+       process to uncompress them.
+
+Geomview 1.8.x
+ - dynamic coverage texturemaps were last supported in SaVi 1.4.8,
+   where a temporary scratchfile using the cylindrical projection
+   was written to and read from disk repeatedly. That legacy method
+   is no longer available.
+   Static Earth texturemaps were last supported in SaVi 1.4.9,
+   where numesh.oogl was used insteas of the STSPHERE command.
+   That legacy method is no longer available.
+
+
+
+The following sections are only of interest to programmers.
+
+
+
+6. TECHNICAL DETAILS OF TEXTUREMAPPING
+======================================
+
+The large coverage panel option exists because 1024x512 seems to be
+the size that Geomview is most willing to texturemap, as it matches the
+size of the yellow-and-blue static Earth texturemap provided with SaVi.
+This is why -large-map is suggested if problems with texturemapping are
+seen.
+
+Interval decay is turned on because white areas show up in Geomview's
+lighting as gold, and blue is rather cooler and matches Geomview's
+default blue sphere.
+
+Coverage images are sent down a pipe to Geomview, inline with oogl
+commands.
+
+
+7. PROGRAMMING IMPLEMENTATION NOTES
+===================================
+
+Mapping is very convenient because the Tcl coverage image is
+effectively already a raw RGB ppm file, which we can send to
+Geomview or write to a scratchfile we tell Geomview to read in.
+
+Changing Image_Width/Height and having everything rescale is
+convenient.
+
+We're reusing the existing projection in the coverage map (rather than
+building a separate image, which would require clearer image/grid
+handling in src/coverage_vis.c and would be even more of a slowdown
+since we'd be rendering two separate maps). Texturemapping of other
+projections has been disabled as incorrect and inconvenient for viewing
+in Geomview.
+
+Note that Geomview 1.9's STSPHERE uses CYLINDRICAL for unprojected
+maps and RECTANGULAR for cylindrical projections, which is backwards.
+(Geomview 1.8.1 does not support STSPHERE, and required the older
+oogl/numesh.oogl to support only cylindrical projections.)
+
+More correct image/grid handling for multiple grids would probably
+require a pointer to the image stored in grid structure we're passing
+around, checking that the Tcl image referenced exists, etc.
+
+
+8. NOTES ON SAVI EARTHMAP CREATION
+==================================
+
+1024x512 sinusoidal pbm map was created from the 600x300 map
+(scaled in gimp, made 1-bit as greyscale indexed colour, saved
+as xbm, run through xbmtopbm). Cylindrical map created from same-size
+Earth.ppm.Z, by using threshold in gimp before going 1-bit and xbm.
+
+New unprojected equirectangular and orthographic spherical maps were
+created from maps generated by Versamap, then screenshots were turned
+to greyscale, resized, set threshold in gimp, then saved as xbm before
+being processed as above.
+ http://www.versamap.com/
+
+Some maps used in previous versions of SaVi were created from maps
+generated by Henry Bottomley's java map applet, which does a variety
+of interesting projections:
+ http://www.btinternet.com/%7Ese16/js/mapproj.htm
+
+The blue-and-gold Earthmap in oogl/Earth.ppm.gz used for simple static
+texturemapping was originally created by the Geometry Center for the
+Orrery, another Geomview module, and tweaked.
+
+The continents mask Earthmaps used for the unprojected duochrome
+shaded land and sea maps were resized from
+ http://naturalearth.springercarto.com/ne3_data/16200/masks/water_16k.png
+
+NASA's Blue Marble project at http://visibleearth.nasa.gov/ has created
+detailed Earth texturemaps for more accurate Earth rendering.
+
+Lloyd Wood (lloydwood@users.sourceforge.net)

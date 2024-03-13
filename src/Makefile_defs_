@@ -1,0 +1,65 @@
+#
+# Makefile_defs_
+#
+# Generic definitions can also work for a linux system.
+# Updated to expect Tcl/Tk 8.5.
+#
+# Always run make ARCH=platform from the top-level savi directory.
+#
+# $Id: Makefile_defs_,v 1.6 2011/04/26 20:41:31 lloydwood Exp $
+
+
+########################################################
+#                                                      #
+# Set machine type -- suffix for savi                  #
+#                                                      #
+# If empty symlink in Makefile fails for Cygwin (./!.) #
+#                                                      #
+########################################################
+MACH = _
+
+########################################################
+#                                                      #
+# set CC to an ANSI C compiler                         #
+#                                                      #
+########################################################
+CC = gcc
+
+########################################################
+#                                                      #
+# set TCL_INCLUDES so that the compiler can            #
+# find the tcl.h and tk.h                              #
+#                                                      #
+# If tcl/tk is installed in a standard place           #
+# it is not necessary to set this. You may need to     #
+# change the numbers to match your version of tcl/tk.  #
+# The numbers in the topmost savi script should also   #
+# match.                                               #
+#                                                      #
+########################################################
+TCL_INCLUDES = -I/usr/local/lib/tcl8.5 -I/usr/local/lib/tk8.5
+
+########################################################
+#                                                      #
+# set TCL_LIBS so that the compiler can find           #
+# libtcl.a and libtk.a. Alter to suit - see above.     #
+#                                                      #
+########################################################
+TCL_LIBS = -ltcl8.5 -ltk8.5
+
+# the above works on most Linux platforms.
+# TCL_LIBS = -ltcl -ltk
+# is a generic alternative to try.
+# TCL_LIBS = -ltcl84 -ltk84
+# works for FreeBSD and Cygwin.
+
+########################################################
+#                                                      #
+# Set OTHER_LIBS so that any other stuff needing to    #
+# be linked in will be!                                #
+#                                                      #
+########################################################
+OTHER_LIBS =
+
+# You may wish to try using some of the following instead:
+# OTHER_LIBS = -static -lsocket -ldl -lz

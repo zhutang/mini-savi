@@ -1,0 +1,339 @@
+#
+######################################################
+#
+#  SaVi by Lloyd Wood (lloydwood@users.sourceforge.net),
+#          Patrick Worfolk (worfolk@alum.mit.edu) and
+#          Robert Thurman.
+#
+#  Copyright (c) 1997 by The Geometry Center.
+#  Also Copyright (c) 2017 by Lloyd Wood.
+#
+# This file is part of SaVi.  SaVi is free software;
+# you can redistribute it and/or modify it only under
+# the terms given in the file COPYRIGHT which you should
+# have received along with this file.  SaVi may be
+# obtained from:
+# http://savi.sourceforge.net/
+# http://www.geom.uiuc.edu/locate/SaVi
+#
+######################################################
+#
+# savi.oogl
+#
+# General description - axes, planes, coverage, satellites.
+# Loads in always-available vector Earth description.
+#
+# $Id: savi.oogl,v 1.27 2017/01/02 06:11:32 lloydwood Exp $
+
+(progn
+  (normalization allgeoms none)
+  (bbox-draw allgeoms no)
+
+  # undocumented command in geomview/src/bin/geomview/common/ui.c
+  # makes mouse rotate camera view in individual window,
+  # not all universe with cameras fixed.
+  (event-mode '[o] Cam Orbit')
+
+  (merge-baseap appearance { shading smooth })
+
+  (camera "Camera" camera {
+	fov 45
+	focus 6
+        } )
+  (xform-set "worldgeom" transform {
+	-0.65249914	-0.38307628	0.65383321	0
+	 0.75735289	-0.35893893	0.54550701	0
+	 0.025715861	 0.851125	0.52433109	0
+	 0		 0		0		0.8
+	} )
+  (xform-set Camera transform {
+	1	0	0	0
+	0	1	0	0
+	0	0	1	0
+	0	0	6	1
+	} )
+
+  (backcolor Camera 0 0 0)
+
+  (read geometry { define unit_sphere_h {
+	appearance {shading smooth material {diffuse 0.2 0.4 1} }
+	SPHERE 1.0
+	0.0 0.0 0.0
+	} } )
+  (read transform { transform define central_t {
+	1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+	} } )
+
+  (read geometry {define axes_h {
+	appearance {linewidth 3}
+	VECT
+	3 6 3
+	2 2 2
+	1 1 1
+	0.0 0.0 0.0
+	1.5 0.0 0.0
+	0.0 0.0 0.0
+	0.0 1.5 0.0
+	0.0 0.0 0.0
+	0.0 0.0 1.5
+	1.0 0.0 0.0 1.0
+	0.0 1.0 0.0 1.0
+	0.0 0.0 1.0 1.0
+	} } )
+
+  (read geometry {define plane_h {
+	appearance {+transparent material {alpha 0.5} }
+	OFF
+	4 1 4
+	2.0 2.0 0
+	2.0 -2.0 0
+	-2.0 -2.0 0
+	-2.0 2.0 0
+	4 0 1 2 3 0.6 0.6 0.6
+	} } )
+
+  (read geometry {define footprint_h {
+	VECT 1 21 1 21 1
+	0 1 -1
+        0.309017 0.951057 -1
+        0.587785 0.809017 -1
+        0.809017 0.587786 -1
+        0.951056 0.309018 -1
+        1.0 1.32679e-06 -1
+        0.951057 -0.309015 -1
+        0.809018 -0.587784 -1
+        0.587787 -0.809016 -1
+        0.309019 -0.951056 -1
+        2.65359e-06 -1.0 -1
+        -0.309014 -0.951057 -1
+        -0.587783 -0.809019 -1
+        -0.809015 -0.587788 -1
+        -0.951055 -0.309021 -1
+        -1.0 -3.98038e-06 -1
+        -0.951058 0.309013 -1
+        -0.80902 0.587782 -1
+        -0.587789 0.809014 -1
+        -0.309022 0.951055 -1
+	0 1 -1
+	1 1 1 1
+        } } )
+
+  (read geometry {define terminator_h {
+	VECT 1 21 1 21 1
+	0 1 -1
+        0.309017 0.951057 -1
+        0.587785 0.809017 -1
+        0.809017 0.587786 -1
+        0.951056 0.309018 -1
+        1.0 1.32679e-06 -1
+        0.951057 -0.309015 -1
+        0.809018 -0.587784 -1
+        0.587787 -0.809016 -1
+        0.309019 -0.951056 -1
+        2.65359e-06 -1.0 -1
+        -0.309014 -0.951057 -1
+        -0.587783 -0.809019 -1
+        -0.809015 -0.587788 -1
+        -0.951055 -0.309021 -1
+        -1.0 -3.98038e-06 -1
+        -0.951058 0.309013 -1
+        -0.80902 0.587782 -1
+        -0.587789 0.809014 -1
+        -0.309022 0.951055 -1
+	0 1 -1
+	1 1 0 1
+	} } )
+
+  (read geometry {define cone_h {
+        appearance {+transparent material {alpha 0.6}}
+        OFF 21 20 40
+        0 0 0
+        0.0 1.0 -1
+        0.309017 0.951057 -1
+        0.587785 0.809017 -1
+        0.809017 0.587786 -1
+        0.951056 0.309018 -1
+        1.0 1.32679e-06 -1
+        0.951057 -0.309015 -1
+        0.809018 -0.587784 -1
+        0.587787 -0.809016 -1
+        0.309019 -0.951056 -1
+        2.65359e-06 -1.0 -1
+        -0.309014 -0.951057 -1
+        -0.587783 -0.809019 -1
+        -0.809015 -0.587788 -1
+        -0.951055 -0.309021 -1
+        -1.0 -3.98038e-06 -1
+        -0.951058 0.309013 -1
+        -0.80902 0.587782 -1
+        -0.587789 0.809014 -1
+        -0.309022 0.951055 -1
+        3 0 1 2 1 1 1
+        3 0 2 3 1 1 1
+        3 0 3 4 1 1 1
+        3 0 4 5 1 1 1
+        3 0 5 6 1 1 1
+        3 0 6 7 1 1 1
+        3 0 7 8 1 1 1
+        3 0 8 9 1 1 1
+        3 0 9 10 1 1 1
+        3 0 10 11 1 1 1
+        3 0 11 12 1 1 1
+        3 0 12 13 1 1 1
+        3 0 13 14 1 1 1
+        3 0 14 15 1 1 1
+        3 0 15 16 1 1 1
+        3 0 16 17 1 1 1
+        3 0 17 18 1 1 1
+        3 0 18 19 1 1 1
+        3 0 19 20 1 1 1
+        3 0 20 1 1 1 1
+        } } )
+
+  (read geometry {define box_satellite_h {
+	OFF
+	8 6 8
+	0.025 0.025 0.025
+	0.025 -0.025 0.025
+	-0.025 -0.025 0.025
+	-0.025 0.025 0.025
+	0.025 0.025 -0.025
+	0.025 -0.025 -0.025
+	-0.025 -0.025 -0.025
+	-0.025 0.025 -0.025
+	4 3 2 1 0 0.0 1.0 0.0 1.0
+	4 4 5 6 7 0.0 1.0 0.0 1.0
+	4 0 1 5 4 0.0 1.0 0.0 1.0
+	4 1 2 6 5 0.0 1.0 0.0 1.0
+	4 2 3 7 6 0.0 1.0 0.0 1.0
+	4 3 0 4 7 0.0 1.0 0.0 1.0
+	} } )
+
+  (read geometry {define planes_satellite_h {
+	OFF
+	12 3 12
+	0.025 0.025 0
+	0.025 -0.025 0
+	-0.025 -0.025 0
+	-0.025 0.025 0
+	0.025 0 0.025
+	0.025 0 -0.025
+	-0.025 0 -0.025
+	-0.025 0 0.025
+	0 0.025 0.025
+	0 0.025 -0.025
+	0 -0.025 -0.025
+	0 -0.025 0.025
+	4 0 1 2 3 0.0 1.0 0.0 1.0
+	4 4 5 6 7 0.0 1.0 0.0 1.0
+	4 8 9 10 11 0.0 1.0 0.0 1.0
+	} } )
+
+  (read geometry {define sphere_satellite_h {
+	appearance {shading smooth material {diffuse 0.4 1 0.2} }
+	SPHERE 0.03
+	0.0 0.0 0.0
+	} } )
+
+  (read geometry {define fancy_satellite_h {
+	INST
+	transform {
+		0 1 0 0
+		1 0 0 0
+		0 0 1 0
+		0 0 0 0.6
+	}
+	geom {
+	LIST
+	{ # solar panels
+		OFF
+		8 2 8
+		0 0.06 0.01
+		0 0.06 -0.01
+		0 0.02 -0.01
+		0 0.02 0.01
+		0 -0.06 0.01
+		0 -0.06 -0.01
+		0 -0.02 -0.01
+		0 -0.02 0.01
+		4 0 1 2 3 0.7 0.7 0.7
+		4 4 5 6 7 0.7 0.7 0.7
+	}
+	{ # strut connecting solar panels
+		VECT
+		1 2 1
+		2
+		1
+		0  0.02 0
+		0 -0.02 0
+		0.7 0.7 0.7 1.0
+	}
+	{ # hexagonal body
+		OFF
+		12 8 18
+		0.015 -0.00866 0.005
+		0.015 0.00866 0.005
+		0 0.0173 0.005
+		-0.015 0.00866 0.005
+		-0.015 -0.00866 0.005
+		0 -0.0173 0.005
+		0.015 -0.00866 -0.005
+		0.015 0.00866 -0.005
+		0 0.0173 -0.005
+		-0.015 0.00866 -0.005
+		-0.015 -0.00866 -0.005
+		0 -0.0173 -0.005
+		6 0 1 2 3 4 5 0 1 0
+		6 6 7 8 9 10 11 0 1 0
+		4 0 1 7 6 0 1 0
+		4 1 2 8 7 0 1 0
+		4 2 3 9 8 0 1 0
+		4 3 4 10 9 0 1 0
+		4 4 5 11 10 0 1 0
+		4 5 0 6 11 0 1 0
+	} } } } )
+
+
+  (read geometry { define sphere_marker_h {
+	appearance {+transparent shading smooth material {diffuse 0.8 0.8 0.2 alpha 0.6} }
+	SPHERE 0.08
+	0.0 0.0 0.0
+	} } )
+
+  (read geometry { define box_marker_h {
+	appearance {+transparent material {alpha 0.6} }
+	OFF
+	8 6 8
+	0.05 0.05 0.05
+	0.05 -0.05 0.05
+	-0.05 -0.05 0.05
+	-0.05 0.05 0.05
+	0.05 0.05 -0.05
+	0.05 -0.05 -0.05
+	-0.05 -0.05 -0.05
+	-0.05 0.05 -0.05
+	4 3 2 1 0 0.6 0.6 0.0
+	4 4 5 6 7 0.6 0.6 0.0
+	4 0 1 5 4 0.6 0.6 0.0
+	4 1 2 6 5 0.6 0.6 0.0
+	4 2 3 7 6 0.6 0.6 0.0
+	4 3 0 4 7 0.6 0.6 0.0
+	} } )
+
+  (read geometry {define box_special_satellite_h {
+	LIST {: box_satellite_h} {: box_marker_h}
+	} } )
+
+  (read geometry {define planes_special_satellite_h {
+	LIST {: planes_satellite_h} {: sphere_marker_h}
+	} } )
+
+  (read geometry {define sphere_special_satellite_h {
+	LIST {: sphere_satellite_h} {: sphere_marker_h}
+	} } )
+
+  (read geometry {define fancy_special_satellite_h {
+	LIST {: fancy_satellite_h} {: box_marker_h}
+	} } )
+
+)

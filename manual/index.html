@@ -1,0 +1,512 @@
+<html>
+<head>
+<title>SaVi satellite constellation visualization - user manual</title>
+<!-- $Id: index.html,v 1.63 2016/08/31 07:07:43 lloydwood Exp $ -->
+<link rel="icon" href="images/savi-spot.png" TYPE="image/png">
+</head>
+<style type="text/css" media="screen, projection">
+
+ul {
+list-style-image: url(images/savi-spot.png)
+}
+
+</style>
+<script>
+<!--
+function warning() {
+  if (window.location.href=="http://savi.cvs.sourceforge.net/viewvc/savi/savi-dev/manual/index.html") {
+    alert("This online manual refers to current SaVi development,\nand not to older releases. See SaVi's manual/ directory.");
+  }
+}
+// -->
+</script>
+<body OnLoad="{warning()}">
+
+<p align="center">
+<a href="http://savi.sourceforge.net/"><img src="../maps/savi-logo.gif" border=0 alt="SaVi logo"></a>
+</p>
+
+<h1 align="center"><i>SaVi</i> - satellite constellation visualization</h1>
+
+<h1 align="center">User manual</h1>
+
+<h2>Contents</h2>
+
+<ol>
+<li><a href="#other">Other documentation for <i>SaVi</i></a></li>
+<li><a href="#main">The main <em>SaVi</em> window</a></li>
+<li><a href="#coverage">The coverage panel</a></li>
+<li><a href="#fisheye">The fisheye window</a></li>
+<li><a href="#hints">Further hints</a></li>
+</ol>
+
+<h2><a name="other">1. Other documentation for <i>SaVi</i></a></h2>
+
+<p>
+This manual introduces <i>SaVi</i> to the user. Descriptions of the satellite
+constellations that <i>SaVi</i> simulates are provided from the <b>Help</b>
+menu.
+</p>
+
+<p>
+Other documentation is available for <i>SaVi</i> in textfiles supplied with the
+<i>SaVi</i> software, which can also be read from the <b>Help</b> menu:
+</p>
+
+<ul>
+<li><a href="../README">The <i>SaVi</i> README</a> introduces <i>SaVi</i> (and
+<i><a href="http://www.geomview.org/">Geomview</a></i>, which <i>SaVi</i> uses for
+three-dimensional rendering), compiling <i>SaVi</i> for your system, and launching
+<i>SaVi</i>.</li>
+<li><a href="../BUGS">Known bugs in <i>SaVi</i></a> are documented.</li>
+<li><a href="../README-COVERAGE-TEXTUREMAP">Sending Earth coverage maps from
+<i>SaVi</i>'s Coverage panel to <i>Geomview</i></a> is discussed separately.</li>
+<li><a href="../COPYRIGHT">Copyright and software distribution and use permissions
+for <i>SaVi</i></a> are also given.</li>
+</ul>
+
+<p>
+<b>Further information on <em>SaVi</em> is available on the web at
+<a href="http://savi.sourceforge.net/">http://savi.sourceforge.net/</a> and <a href="http://personal.ee.surrey.ac.uk/Personal/L.Wood/software/SaVi/">http://personal.ee.surrey.ac.uk/Personal/L.Wood/software/SaVi/</a>.</b>
+</p>
+
+<p>
+Support for <em>SaVi</em> is provided via the
+<a href="https://lists.sourceforge.net/lists/listinfo/savi-users">savi-users mailing list</a>.
+</p>
+
+<p>
+<i><a href="http://www.geomview.org/">Geomview</a></i> provides <i>SaVi</i> with
+three-dimensional rendering capabilities.
+When using <i><a href="http://www.geomview.org/">Geomview</a></i>, the <i>Look</i>,
+<i>Fly</i> and <i>Orbit</i> buttons
+in its toolbar are the most useful; the stationary axes allow you to see the Earth
+rotating against something fixed as you orbit your camera view around.
+(<i>Rotate</i> leaves the cameras in all views fixed, while rotating all objects;
+<i>Orbit</i> allows you to alter a single camera window.)
+</p>
+<p>
+ <a href="http://www.geomview.org/docs/"
+>Documentation for <em>Geomview</em></a>, describing the many features of <i>Geomview</i>,
+ is available separately on the web at
+<a href="http://www.geomview.org/">http://www.geomview.org/</a>.
+</p>
+
+<p>
+Note that<i> SaVi</i> has a number of simple command-line options that can be seen by typing:<br>
+<code>./savi -help</code><br>
+which provides brief summary documentation of the available options.
+<p>
+
+<p>
+Below is a brief guide to the main features of <i>SaVi</i>'s graphical user interface:
+</p>
+
+<h2><a name="main">2. The main <i>SaVi</i> window</a></h2>
+
+<p>
+The main window is where satellite parameters are edited and where <i>Geomview</i>
+(if it is in use) is controlled from the <b>Rendering</b> menu. The simulation
+is run forwards or backwards in time using the <b>&gt;&gt;</b> and <b>&lt;&lt;</b>
+buttons on the playbar at the bottom of the window. <b>&gt;</b> and <b>&lt;</b>
+step forwards or backwards a single interval of time; the time interval between
+simulation steps is set to a default of sixty seconds, and can be changed here.
+</p>
+
+<p align="center">
+<img src="images/savi-main.png" alt="SaVi's main window"><br>
+<b>Main window  - to see this, launch <i>SaVi</i>.</b>
+</p>
+
+<p>
+Resizing this window to make it larger, so that you can see information
+on more satellites at once, is a good idea.
+</p>
+
+<p>
+Double-click a line listing satellite parameters to open the 'Edit satellite
+parameters' window and edit values directly. Press return after entering each value
+to update the satellite and change the simulation. A custom list of edited
+satellites can be saved for posterity as a script to be loaded in again later -
+see the <b>File</b> menu in the main window's menubar.</p>
+</p>
+
+<p>
+Clicking a line listing satellite parameters highlights it, giving it a purple
+cross in the Coverage and Fisheye windows, and a yellow surround in Geomview's
+Camera window. Control-clicking a line adds it to or removes it from the current
+selection. Shift-clicking a line includes the range of satellites from the
+current selection to that line.
+</p>
+
+<p>
+The menubar's <b>Edit</b> menu allows you to copy or cut selected satellites,
+or edit existing or new satellite parameter lines, via an edit box. Like all
+<i>SaVi</i> windows, this edit box can be left open while other windows are
+active. The edit box will always show parameters for the last-selected
+satellite.
+</p>
+
+<p align="center">
+<img src="images/savi-edit.png" alt="SaVi's edit box"><br>
+<b>Edit window - to see this, use the Edit menu, or double-click a satellite
+parameter line.</b>
+</p>
+
+<p>
+Individual satellites and their coverage can be hidden from view here, by using
+the checkboxes.
+</p>
+
+<p>
+Simulation constants can also be edited from the <b>Edit</b> menu. Altering these
+from Earth normal is not for the faint of heart.
+</p>
+
+<p align="center">
+<img src="images/savi-constants.png" alt="SaVi's simulation constants"><br>
+<b>Simulation constants - to see this, use the Edit menu.</b>
+</p>
+
+<p>
+The menubar's <b>Views</b> menu allows you to open the coverage panel and fisheye
+windows, described further below. Opening the coverage panel is often the first
+thing that you do upon launching <i>SaVi</i>.
+Other options in the <b>Views</b> menu duplicate the
+playbar at the bottom of the window, including the 'Restart' button to reset the
+clock to time 0.
+</p>
+
+<p>
+The <b>Constellations</b> menu allows you to load in simulations of known satellite
+constellations, both existing and proposed. You can also empty space by deleting all
+created satellites, or run the rosette generator to easily create a custom constellation.
+The simulations on this menu are split into several groups:
+</p>
+
+<ul>
+<li>simple theoretical constellations</li>
+<li>systems in use</li>
+<li>navigation constellations</li>
+<li>non-geostationary equatorial rings</li>
+<li>huge broadband proposals, mostly from the 1990s (best viewed using fast computers!)</li>
+<li>other system proposals (not built)</li>
+<li>sample TLE (two-line element) files. Although <i>SaVi</i> has very elementary TLE
+parsing capabilities, simulation from TLEs is not at all accurate! This is still
+experimental, and not recommended for use. Up-to-date TLEs can be loaded from the web
+via the command on the <b>File</b> menu.</li>
+</ul>
+<p align="center">
+<img src="images/savi-tle.png" alt="SaVi's elset loading tool"><br>
+<b>TLE loading tool - to see this, use the File menu.</b>
+</p>
+
+<p>
+Decriptions of these systems are available in the Details window that is always
+accessible from the <b>Help</b> menu. Many of these constellations are described in
+<a href="http://savi.sourceforge.net/about/">material introducing satellite constellations</a>.
+</p>
+
+<p>
+Note that loading in a constellation from the menu replaces all existing satellites.
+To add a constellation to existing satellites that you wish to preserve, use Load... in
+the <b>File</b> menu, and load in a Tcl script from <i>SaVi</i>'s <code>data/</code> directory.
+</p>
+
+<p>
+Rosette constellations can be easily created using the Ballard rosette tool,
+which can also generate a number of preset constellations.
+</p>
+
+<p align="center">
+<img src="images/savi-rosette.png" alt="SaVi's rosette generator tool"><br>
+<b>Ballard rosette tool - to see this, use the Constellations menu.</b>
+</p>
+
+To save an existing constellation you have created, such as one generated using the
+Ballard rosette tool, use the <b>File</b> menu's <i>Save satellites as Tcl
+script...</i> option. To begin from scratch, either delete all satellites, or
+select Empty space, and confirm the dialog that comes up.
+</p>
+
+<p align="center">
+<img src="images/savi-empty.png" alt="SaVi's 'Empty space?' dialog"><br>
+<b>Empty space of all satellites dialog - to see this, use the Constellations menu.</b>
+</p>
+
+<p>
+The <b>Rendering </b>menu includes a <i>Real-time mode</i> option that attempts
+to synchronise <i>SaVi</i> to the computer's clock, so that an interval is
+simulated every second. If you set to 1 second per interval, <i>SaVi</i> attempts
+motion in real time. This mode option is most useful on very fast computers.
+</p>
+
+<p>
+The <b>Rendering</b> menu is complete when <i>SaVi</i> is running with
+<i>Geomview</i>. The full menu allows you to control how <i>Geomview</i> shows
+the constellations in its Camera windows. To change the satellite type shown in 
+<i>Geomview</i>, select a marker type from the top section. To restore the
+default green dots, select that marker type again.
+</p>
+
+<p>
+By turning off <i>Show central body</i>, an outline Earth is produced. This is
+useful when used with <i>Geomview</i>'s spherical projection (in the <i>Geomview</i>
+window's <b>Space</b> menu.)</p>
+
+<p>
+<i>Animate in Geomview</i> can be turned off temporarily if <i>Geomview</i> becomes
+problematic, so <i>SaVi</i> can be used standalone. This option is useful on
+slower computers.
+</p>
+
+<p>
+The <b>Help</b> menu identifies <i>SaVi</i> and provides brief installation information.
+</p>
+
+<h2><a name="coverage">3. The coverage panel</a></h2>
+
+<p>
+In the coverage panel a map projection of the Earth and visible coverage is
+shown. The coverage panel is where most viewing work in <i>SaVi</i> is done.
+It is likely that this will be the first option selected once <i>SaVi</i> is
+running, and that most work will be done using the menubar at the top of this
+panel's window.
+</p>
+
+<p>
+When the coverage panel is first opened from the <b>Views</b> menu, you will
+be asked how large you want the map to be, and you can also select how many
+coverage diversity colours are needed.
+The Earth map can be either 600x300 pixels or 1024x512 pixels in size. Four
+colors is the default; more are useful when viewing large numbers of
+satellites, such as the GPS and Galileo navigation constellations.
+</p>
+
+<p align="center">
+<img src="images/savi-choose.png" alt="SaVi's choose coverage parameters dialog"></br>
+<b>Choose coverage panel size/colours - to see, use Views menu on main window.</b>
+</p>
+
+<p>
+After you have chosen, the coverage panel will open. Here, the smaller
+coverage panel is shown.
+
+<p align="center">
+<img src="images/savi-coverage.png" alt="SaVi's coverage panel"></br>
+<b>Coverage panel - to see, use Views menu on main window.</b>
+</p>
+
+<p>
+Stretching this window horizontally
+will show two projections side-by-side; this is useful for looking at coverage
+at the edge of the map, which lies in the middle of the two copies.
+</p>
+
+<p>
+A number of different map projections can be chosen:
+</p>
+
+<ul>
+<li>The <b>unprojected land/sea</b> map is colorful, matching and enhancing <i>Geomview</i>'s simple static world map.</li>
+<li>The default <b>unprojected</b> map is most useful for examining coverage, and for saving maps in to show to others.</li>
+<li>The <b>cylindrical</b> map shows high latitudes and poles less clearly than the
+unprojected view does.</li>
+<li>The <b>sinusoidal</b> views may be of use for examining coverage in the map centers.</li>
+<li>The <b>spherical</b> views are a poor substitute for running <i>Geomview</i>,
+to gain an idea of 'real' coverage on a globe.</li>
+</ul>
+
+<p>
+The unprojected views and the cylindrical view can send their maps as
+texturemaps to <i>Geomview</i> to draw on the world sphere in its camera.
+This texturemapping feature is controlled from the coverage panel's
+<b>Rendering</b> menu.
+</p>
+
+<p>
+Clicking in the map sets coordinates that are passed to the fisheye window,
+and can then be selected in that window to replace the current coordinates in use.
+This is a two-step process to prevent stray clicks from inadvertently changing
+the fisheye. To change the fisheye in one step, control-click the coverage map.
+</p>
+
+<p>
+Satellite coverage (which defaults to yellow/red) is intended to give an idea of
+the number of satellites visible from a point, or <i>available diversity</i>.
+The higher the number of satellites covering a point, the deeper the shade of red.
+</p>
+
+<p>Interval decay (which defaults to shades of blue) is intended to give an idea of
+where a satellite footprint has been and is going, even when you look at a still map
+snapshot. Turning this feature off replaces blue with white.
+</p>
+
+<p>
+The sunlight checkbox shows a day/night terminator, reusing the last two interval decay
+colors. Sunlight is simulated as a 'special' satellite zero, shown at the start of the
+main satellite list when sunlight is turned on. Sunlight begins with time zero as an
+equinox.
+</p>
+
+<p>
+Map colors can be controlled to taste by the <b>Shading</b> menu or by clicking the
+color wells in the key individually to launch a color selector. 'Change shading'
+and 'Shade between end colors' will always produce ranges of tasteful hues. To alter
+just the coverage or interval decay colors, uncheck the 'Show coverage' or 'Add
+interval decay' checkboxes before using the shading menu options.
+</p>
+
+<p>
+Satellites selected in the main window will be shown in the coverage panel as
+purple, rather than green, as will their groundtracks.
+</p>
+
+<p>
+Still and animated map snapshots can be saved from the <b>File</b> menu.
+These are saved in <code>.gif</code> format. Stills can also be saved using
+the simple <code>ppm</code> bitmap format, and <code>.png</code> if it is supported.
+Map animations require <code><a href="https://www.lcdf.org/gifsicle/">gifsicle</a></code>
+to create.
+</p>
+
+<p>
+The coverage of all satellites is controlled in the coverage panel by angle,
+pop-up menu, and slider. The angle is between 0 and 90 degrees. The angle can either
+indicate either:
+<ul>
+<li>the <em>mask elevation</em>. This is the minimum angle above the horizon and through
+the atmosphere needed to establish communication with the satellite. This is measured from
+the ground terminal.
+<li>half the angle of the useful satellite beamwidth, referred to as the
+<em>half-angle</em>. This is measured from the overhead satellite.
+</ul>
+<p>
+The default mask elevation is generally more useful, as it can be shown for the ground
+terminal in the fisheye view.
+A mask elevation angle of zero degrees is the same as a half-angle of ninety degrees
+when the satellite is directly over the ground terminal.
+The slider to the right alters the angle value directly.
+</p>
+
+<p>
+Computed coverage estimates are currently not accurate, and vary between projections.
+</p>
+
+<p>
+The playbar is repeated at the bottom of this window for convenience.
+</p>
+
+<h2><a name="fisheye">4. The fisheye window</a></h2>
+
+<p>
+The fisheye window shows a view of the sky looking upwards from the ground, with the
+horizon around the outside of the circle. North is to the top of the fisheye. East is
+to the left, unless the 'Reverse fisheye view' option is chosen, since this is looking
+up. The
+default location is at zero point (zero longitude, zero latitude, zero altitude,
+floating on the sea just off the coast of Africa).
+</p>
+
+<p align="center">
+<img src="images/savi-fisheye.png" alt="SaVi's fisheye window"><br>
+<b>Fisheye panel - to see, use Views menu on main window.</b>
+</p>
+
+<p>
+The fisheye window is completely resizeable, and will scale the fisheye area to
+suit. A larger fisheye shows a large number of satellites in view much more clearly.
+</p>
+
+<p>
+If <i>ground terminal mask elevation</i> is selected from the coverage panel, the mask
+circle will be shown, and the time a satellite spends in view (i.e. within the mask
+area) will be indicated next to the satellite. Note that times are only accurate to
++/- half the simulation interval, assuming that a satellite began moving in the
+fisheye outside the mask area. Setting a smaller simulation interval provides more
+accurate time-in-view estimates.
+</p>
+
+<p>
+The equatorial geostationary arc can be drawn along with selected latitude markers,
+or parallels. These parallels default to 3.5 degrees of latitude, which is the limit
+of the geostationary exclusion zone, where frequencies used by geostationary satellites
+cannot be reused by other satellites, to prevent interference.
+</p>
+
+<p>
+<i>Enter new coordinates</i> updates the fisheye to use the values in the white
+text boxes, which will be copied to the actual coordinates shown higher up in the fisheye panel.
+Use this feature to determine how many satellites are visible from a selected point
+on the Earth.
+</p>
+
+<p>
+<i>Reverse fisheye view</i> switches East and West, to give an idea of satellites
+moving over the Earth. This can be compared with <i>Geomview</i>'s spherical view
+with the central body turned off, mentioned earlier.
+</p>
+
+<h2><a name="hints">5. Further hints</a></h2>
+
+<p>
+The best, most accurate, way to simulate a custom constellation in <i>SaVi</i> is
+either to:
+</p>
+
+<ul>
+<li>write a Tcl script, similar to the existing Tcl scripts in the <code>savi/data</code>
+directory. Discussion of Tcl and the <code>SATELLITE</code> keywords specific to <i>SaVi</i> is
+outside the scope of this note - but much can be learned from reading the code and
+comments in existing scripts. Further information on Tcl is available from
+<a href="http://www.tcl.tk/">http://www.tcl.tk/</a></li>
+<li>improve the TLE-handling code in <code>savi/tcl/constellations.tcl</code> so that
+it works more accurately, by staring at existing FORTRAN code and translating it into Tcl.
+That is likely not for the faint of heart.</li>
+</ul>
+
+<p>
+The background color in <i>Geomview</i> is set at the start of
+<code>savi/oogl/savi.oogl</code>, as three fractional values between 0 and 1,
+representing Red, Green and Blue.<br>
+<b>0 0 0</b> is black.<br>
+<b>1 1 1</b> is white.
+</p>
+
+<p>
+<i>Geomview</i> can have multiple cameras open showing different
+views. Scripting of camera actions in <i>Geomview</i> (using its oogl
+object-oriented graphics language, which is a degenerate form of lisp) can be
+very powerful.
+</p>
+
+<p>
+Notes on sources and for and details of simulated constellations can be found in the
+comments to each constellation script. See the <code>savi/data</code>
+directory, or use the <b>View Source...</b> button at the bottom of the
+<b>Help</b> menu window where details of each constellation are displayed.
+</p>
+
+<p>
+<b>Use <i>SaVi</i> with <i>Geomview</i> 1.9 or later. This is strongly recommended.<br>
+Use the latest <i>Geomview</i> release from <a href="http://www.geomview.org/">http://www.geomview.org/</a>.</b>
+</p>
+
+<p>
+<b>Further information on <i>Geomview</i> is available on the web at
+<a href="http://www.geomview.org/">http://www.geomview.org/</a></b>
+</p>
+
+<p>
+<b>Further information on <i>SaVi</i> is available on the web at
+<a href="http://savi.sourceforge.net/">http://savi.sf.net/</a></b>
+</p>
+
+<hr>
+
+<small><a href="http://info.ee.surrey.ac.uk/Personal/L.Wood/">Lloyd Wood</a>
+(<a href="mailto:lloydwood@users.sourceforge.net">lloydwood@users.sourceforge.net</a>)
+</small>
+
+</body>
+</html>

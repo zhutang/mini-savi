@@ -1,0 +1,565 @@
+README for SaVi - SATELLITE CONSTELLATION SIMULATION AND VISUALIZATION
+======================================================================
+$Id: README,v 1.152 2017/06/28 11:22:34 lloydwood Exp $
+
+This README supplied with the SaVi satellite visualization software
+contains the following sections:
+
+1. Introduction to SaVi
+   - SaVi is described and places to obtain the latest SaVi are given.
+2. Requirements for SaVi
+   - SaVi's use of Tcl/Tk is described.
+3. SaVi and Geomview
+   - SaVi's optional use of Geomview for 3D rendering is outlined.
+4. Installation instructions for SaVi
+   - how to make SaVi correctly. You must read and follow this section.
+5. Running the SaVi software
+   - how to launch SaVi with or without Geomview. Read this section.
+6. Command-line switches for SaVi
+   - things that can be selected when launching SaVi.
+7. Contributing to SaVi
+   - notes for programmers.
+8. Version history of SaVi
+   - a brief overview of major developments in SaVi.
+9. Acknowledgements for SaVi
+   - a list of contributors to the SaVi project.
+
+
+
+1. INTRODUCTION TO SAVI
+=======================
+
+SaVi is software written to facilitate the visualization and analysis
+of satellite constellations.  This software is freely and publically
+available.  We require that use of any images produced by this software
+credits SaVi and The Geometry Center.
+
+A webpage user manual for SaVi is in the manual/ directory.
+
+Lloyd Wood, the current SaVi maintainer, welcomes suggestions,
+patches and improvements to SaVi. Lloyd can be contacted at:
+lloydwood@users.sourceforge.net
+
+See the SaVi webpages:
+
+http://savi.sourceforge.net/
+http://personal.ee.surrey.ac.uk/Personal/L.Wood/software/SaVi/
+http://www.geom.uiuc.edu/projects/visualization/savi.html
+
+Support for SaVi is provided via the savi-users mailing list:
+https://lists.sourceforge.net/lists/listinfo/savi-users
+
+SaVi is not a completely polished or finished product.
+SaVi is not guaranteed to be fit for any purpose.
+Bugs in the SaVi software are still being discovered and addressed.
+Users of SaVi are responsible for verifying for themselves that their
+simulations are sufficiently accurate to be useful for their purposes.
+
+Known bugs and possible future features of SaVi are discussed
+in the textfile BUGS. Please report problems with your use of SaVi
+to the savi-users mailing list.
+
+The original authors could be contacted at: savi@geom.umn.edu.
+
+SaVi is originally Copyright (c) 1995-1997 by The Geometry Center.
+SaVi is also Copyright (c) 2001-2017 by Lloyd Wood.
+See the textfile COPYRIGHT for full details.
+
+
+2. REQUIREMENTS FOR SAVI
+========================
+
+SaVi requires:
+
+ - an ANSI C compiler, e.g. gcc from http://gcc.gnu.org/
+   - most recently tested and built with gcc 5.4.0.
+     previously tested with gcc 4.9 back to 4.0, 3.4 to 3.2, and 2.95.
+   or clang from http://clang.llvm.org/
+   - tested and builds with clang 3.1.
+
+ - Tcl and Tk, from http://www.tcl.tk/
+   - most recently tested with Tcl/Tk 8.5 releases and ActiveTcl 8.6.4.
+     Use of the Http package for loading TLEs from the web demands
+     a minimum of Tcl/Tk 8.0.
+     Use of the Tk color picker and load/save file dialogs demands
+     a minimum of Tcl/Tk 7.6/4.2.
+     Tcl/Tk 8.x gives increased performance, and is recommended.
+     If an existing installation of Tcl does not include header files,
+     e.g. /usr/include/tcl.h, you should be able to add these by
+     installing the tk-devel and tcl-devel packages (Red Hat, Fedora)
+     or the tcl-dev and tk-dev packages (Debian, Ubuntu).
+     The savi wrapper script in this directory, and the Makefile_defs_
+     files in the src/ directory, assume that Tcl/Tk 8.5 are available,
+     and will need to be edited if other versions are used.
+     On RedHat/Fedora/CentOS etc. try:     sudo yum install tk-devel
+     On Ubuntu/Debian etc. try:            sudo apt-get install tk-dev
+
+SaVi can optionally use, and is far more useful with, these recommended
+packages:
+
+ - Geomview, discussed below,
+   for three-dimensional animations.
+   - most recently tested with Geomview 1.9.5.
+     On Ubuntu/Debian etc. try:            sudo apt-get install geomview
+
+ - gifsicle, from http://lcdf.org/gifsicle/
+   for saving animations of satellite coverage.
+   - most recently tested with LCDF Gifsicle 1.78.
+     On Ubuntu/Debian etc. try:            sudo apt-get install gifsicle
+
+SaVi may also optionally use, but does not in any way require:
+
+ - the zlib compression library, from http://www.zlib.net/
+   for compressing texturemap images sent to Geomview.
+   - most recently tested with zlib 1.2.11. zlib is most useful with
+     Geomview. To build with zlib to compress dynamic texturemaps that
+     are sent to Geomview, edit src/Makefile to remove the -DNO_ZLIB flag.
+     On RedHat/Fedora/CentOS etc. try:     sudo yum install zlib-devel
+     On Ubuntu/Debian etc. try:            sudo apt-get install zlib1g-dev
+
+SaVi has been successfully compiled and run on the following architectures
+and unix-like operating systems:
+
+ - Intel x86 and PowerPC / Macintosh OS X
+   (10.11.6, 10.9.5, 10.7.2, 10.6.8, 10.5.8, 10.4.11)
+   Mac users - you must read the BUGS file! A section there discusses
+   Mac-specific problems and workarounds for those problems.
+ - Intel x86 / Windows running Cygwin (most recently tested with 2.8.0,
+   previously Cygwin 1.7.10 to .29 and 1.5.9-1 to .25-11)
+   Geomview support demands 32-bit Cygwin, not 64-bit - see BUGS.
+   Cygwin users - Insight Tcl/Tk 8.4 was replaced by a more conventional
+   unix port of 8.5 in October 2011. If you are still using Insight and
+   haven't updated, build with:
+     make ARCH=cygwin84
+   instead of cygwin.
+ - Intel x86 / Windows 10 Anniversary Update
+   Enable developer mode and install bash, install and run the Xming
+   web server from http://xming.sf.net and then launch bash and type:
+     sudo apt-get savi
+     sudo apt-get geomview
+     set DISPLAY=:0
+     geomview -run savi
+ - Intel x86 / Linux (Ubuntu 14, 13, 10, 9, 8; CentOS 6.5, Fedora 12;
+   Red Hat 6.x, 7.x and Enterprise 3.0; Mandrake 9.0; Mandriva One 2010)
+   Ubuntu users - you must read the instructions in
+   src/Makefile_defs_ubuntu!
+ - Intel x86 / FreeBSD (6.0, 8.1)
+ - Sun SPARC / Solaris (2.4 and later, 10)
+ - SGI / Irix5
+
+SaVi is 64-bit clean.
+
+
+
+3. SAVI AND GEOMVIEW
+====================
+
+SaVi can optionally use Geomview for 3D rendering of Earth and
+satellites.  Geomview requires a unix-like operating system and
+an X Window display.
+
+SaVi can be run either as a stand-alone program, or as an "external
+module" for the Geomview program.  The latter mode enables
+three-dimensional visualization of the satellite constellations,
+but also requires Geomview.
+
+Geomview is available from:
+	http://www.geomview.org/
+	http://geomview.sourceforge.net/
+
+On Ubuntu/Debian etc., where these packages are maintained:
+        sudo apt-get install geomview
+        sudo apt-get install savi
+        geomview -run savi
+will save you the effort of compiling Geomview or SaVi.
+
+SaVi was most recently tested with Geomview 1.9.5.
+The 1.9 releases significantly improve stability, compatibility and
+performance over 1.8.1.  The latest Geomview release (as of writing,
+1.9.5) is strongly recommended for all platforms.
+
+For texture mapping, SaVi can optionally use the zlib compression
+library to compress the dynamic coverage texturemaps that are sent to
+Geomview. Compile zlib support by removing the -DNO_ZLIB flag from
+src/Makefile when compiling SaVi. Texture mapping support requires
+OpenGL support in Geomview, and is discussed in further detail in
+README-COVERAGE-TEXTUREMAPPING, also accessible from SaVi's Help menu.
+
+Discussion of maintaining and building Geomview on various platforms
+can be found in the geomview-users mailing list archives:
+	http://lists.sourceforge.net/lists/listinfo/geomview-users
+
+Instructions for building Geomview under Microsoft Windows with Cygwin
+are available from:
+	http://personal.ee.surrey.ac.uk/Personal/L.Wood/software/SaVi/building-under-Windows/
+
+
+Geomview, like SaVi, was originally available from the Geometry Center:
+	http://www.geom.uiuc.edu/software/download/geomview.html
+
+The Geometry Center was at the University of Minnesota (umn), and
+its webserver content is now hosted at the University of Illinois at
+Urbana-Champaign (uiuc).
+
+Contracted work with Geomview can be undertaken by Geometry Technologies:
+        http://www.geomtech.com/
+
+
+
+4. INSTALLATION INSTRUCTIONS FOR SAVI
+=====================================
+
+For the remainder of this file, we shall refer to the directory
+originally containing this README file, the root of the SaVi tree,
+as $SAVI.
+
+That is, if you are a user and have unpacked SaVi in your home
+directory, then $SAVI would be the topmost SaVi directory
+~user/saviX.Y.Z that contains this README file that you are now
+reading. This is a shorthand; $SAVI is determined by the
+$SAVI/savi script that launches SaVi.
+
+
+1.) In $SAVI/src/Makefile_defs_ARCH (where ARCH is linux, cygwin,
+    macosx, sun, freebsd, irix or ubuntu) you may need to edit some
+    variables to suit your system.
+    If your system is current with recent versions of Tcl and Tk
+    installed, and everything is in its usual place, the generic 
+    definitions file, called "Makefile_defs_", may work perfectly,
+    and typing 'make' in SaVi's topmost directory may be sufficient
+    to compile the C files in src/ and index the Tcl files in tcl/.
+
+    If not, choose the Makefile_defs_ file most suitable for your
+    system and:
+
+	- ensure that the variables are set to give the locations 
+		and correct versions of the Tcl/Tk libraries and
+		header include files.
+
+	- ensure that the CC variable is set to an available ANSI C
+		compiler, e.g. gcc
+
+2.) Return to the topmost SaVi directory $SAVI. Once in that directory,
+    type e.g. 'make ARCH=linux' (or cygwin, or macosx, or sun, or
+    freebsd, or irix, or ubuntu) in the topmost $SAVI directory. Typing
+    just 'make' in the topmost directory will use the default
+    Makefile_defs_ file.
+
+3.) You may also need to edit the locations of the Tcl and
+    Tk libraries in $SAVI/savi at the TCL_LIBRARY and TK_LIBRARY lines
+    when linking dynamically.
+
+    If running the savi script to launch SaVi generates Tcl or Tk
+    errors, it is often because either the TCL_LIBRARY or TK_LIBRARY
+    lines need to be corrected in that shell wrapper, or because make
+    was not done using the top-level Makefile in the $SAVI directory.
+
+    SaVi needs $SAVI/tcl/tclIndex to run. That tcl/tclIndex file must
+    be generated by the tcl/Makefile that, like all other subdirectory
+    Makefiles, is called by the top-level master Makefile in the same
+    directory as this README file.
+
+4.) SaVi allows binaries for multiple architectures to co-exist on a
+    shared filesystem, by running the appropriately-named binary:
+	bin/SaVi-$ARCH.bin
+    The most recently compiled executable is also available as:
+	bin/SaVi
+
+    To save disk space on filesystems used by only one architecture and
+    avoid messages saying which binary copy was selected to be run, you
+    can rm bin/SaVi-*.bin, leaving the single bin/SaVi executable. This
+    has the advantage of displaying just 'SaVi' as the process name.
+    This is very useful for Mac OS X, where that name is shown in the
+    menubar.
+
+
+5. RUNNING THE SAVI SOFTWARE
+============================
+
+As in the previous section, we refer to the directory containing this
+README file as $SAVI. Always launch SaVi using the savi script in this
+directory. Do not run the binary executable directly.
+
+1.) To run SaVi standalone, without needing Geomview,
+    in the $SAVI directory type:
+
+	./savi
+
+    Or from any other directory,
+
+	$SAVI/savi
+
+    where $SAVI is the path of the savi directory.
+    To load in a satellites tcl scriptfile directly, type:
+
+	./savi filename
+
+    SaVi supports a number of command-line switches, many related to
+    use with Geomview. To see these, type:
+
+	./savi -help
+
+2.) To run SaVi as a module within Geomview, for 3D rendering,
+    when in the $SAVI directory start up Geomview:
+
+	geomview
+
+    and then select "SaVi" from Geomview's scrollable list of external
+    modules, where it will have appeared.  Or invoke directly:
+
+	geomview -run ./savi [flags] <script filename>
+
+    Or from any directory where you can start Geomview, try
+
+	geomview -run ./savi [flags] <script filename>
+
+    You might invoke a saved one-line script, to pass parameters
+    through to SaVi:
+
+	geomview -run ./savi [always-on flags] $*
+
+    To see SaVi listed as an external module in Geomview's main
+    window whenever Geomview is launched alone, Geomview has to know
+    where SaVi is and how to launch it. This can be done by reading
+    from a file called .geomview, and the .geomview file in the savi/
+    directory:
+           (emodule-define "SaVi" "./savi -geomview")
+    tells Geomview this whenever geomview is launched with the savi
+    directory as the working directory. This line can be edited
+    with the absolute path of the savi start script and copied
+    into a .geomview configuration file in the geomview/ directory,
+    or to a .geomview-* configuration file in geomview's modules
+    directory, as described below, so that SaVi is always accessible
+    from Geomview even when Geomview is launched by itself.
+
+
+3.) To make SaVi accessible to other users, you can copy the "savi"
+    script in $SAVI to some directory in other users' search
+    paths such as /usr/local/bin, so they needn't add SaVi's own
+    directory to their own path.  If you do, edit the "savi" script,
+    inserting the full path name of $SAVI as indicated in
+    the script itself:
+
+# If you copy this script from the SaVi installation and run it
+# elsewhere, then you should uncomment the following line:
+# SAVI=/usr/local/savi
+# and replace /usr/local/savi with the location of
+# your SaVi installation.
+
+    You can also make SaVi accessible from Geomview's scrollable list
+    of external modules.  Assuming Geomview is installed in
+    /usr/local/Geomview, say:
+
+   	cd /usr/local/Geomview/modules
+	ls -lsa
+	    to see a number of files telling Geomview about modules.
+	    These are shown alphabetically in Geomview's External
+	    Modules panel.
+
+    Create a file here called ".geomview-savi" containing e.g.:
+
+        (emodule-define  "SaVi"  "/usr/local/savi1.5.0/savi -geomview")
+
+    where the right-hand side is the absolute path name for the savi
+    script. The .geomview file can be modified to say e.g.:
+	(emodule-define "SaVi" "./savi -redrawn-menus -geomview")
+    with other always-on flags to control SaVi behaviour.
+
+
+
+6. COMMAND-LINE SWITCHES FOR SAVI
+=================================
+
+SaVi supports the following command-line switches and flags when run
+standalone. These can be combined, e.g.
+    geomview -run savi -geomview -large-map -levels -19 -debug $*
+
+-debug
+    turns on debugging output to the terminal. This is useful for
+    programmers or for output of detailed statistics.
+
+-fake-geomview
+    pretends that SaVi is running with Geomview, even when it isn't.
+    This is useful for debugging.
+
+-help
+    shows command-line switch help in the terminal.
+
+-large-map
+    uses a bigger coverage panel map of 1024x512 pixels, instead of 600x300.
+    Also defaults to 14 color levels, rather than 4. Useful for larger
+    displays, and for better texturemapping.
+
+-levels <n>
+    Sets the number of color levels used by the coverage panel map.
+    n can be from 1 to 19. A large value of n is useful for high-diversity
+    constellations with overlapping coverage, such as GPS and Galileo.
+
+-map-view-height <n>
+    resizes the coverage panel map to 2n pixels across by n pixels down.
+    A large height can give slightly better texturemapping in Geomview,
+    though the coverage panel map outline is not resized. n can be from
+    8 to 2048, giving map sizes ranging from 16x8 to 4096x2048 pixels.
+
+-map-view-middle <longitude>
+    shifts the map horizontally so that the selected longitude is centred.
+    zero is the default. The longitude can be from -180 to 180, going from
+    west to east.
+
+-max-transmit-altitude <kilometers>
+    sets an altitude above which coverage footprints are not drawn.
+    This is useful for simulating satellites in elliptical orbits
+    whose satellites communicate or take imagery while near perigee.
+
+-min-transmit-altitude <kilometers>
+    sets an altitude below which coverage footprints are not drawn.
+    This is useful for simulating satellites in elliptical orbits whose
+    satellites communicate while near apogee, e.g. Molnya, Tundra,
+    Sirius Radio and Ellipso.
+
+-orbit-model <JO|J2>
+    chooses the orbital model. J2 is the default, but a simpler Keplerian
+    J0 can be selected.
+
+-redrawn-menus
+    changes how SaVi draws its menus to an older method. This is useful
+    on some versions of Tcl under Mac OS X (particularly 10.5 Leopard).
+
+-splash
+    generates SaVi's about dialog on launch. This dialog is useful
+    for reporting the version of SaVi and the command-line flags chosen.
+
+-version
+    reports the version of SaVi and when it was built.
+
+[filename]
+    a script for SaVi to run on launch, typically from the savi/data
+    directory.
+
+
+and when run with Geomview:
+
+-dynamic-texture-with-map
+    passes the unprojected or cylindrical bitmap coverage panel outline
+    map through to Geomview for texturemapping, instead of drawing
+    the vector outline map in Geomview.
+
+-geomview
+    tells SaVi that it is being run with Geomview, and that it should
+    pipe commands to Geomview.
+
+-gzip-compressed-textures
+    uses gzip headers when compressing the texturemaps sent to Geomview,
+    when SaVi has been built with the zlib library. Only of interest to
+    programmers.
+
+-no-logo
+    disables display of the SaVi logo in the corner of the Geomview camera.
+
+-sun-lighting
+    turns on Geomview light sources that attempt to emulate the Sun's
+    lighting. Lighting appears wrong, so this is disabled by default.
+
+-uncompressed
+    forces sending uncompressed texturemaps to Geomview, when SaVi
+    has been built with the zlib library. Only of interest to
+    programmers.
+
+
+
+7. CONTRIBUTING TO SAVI
+=======================
+
+Contributions and additions to SaVi, particularly those addressing
+the issues raised in the BUGS textfile, are welcome - just email
+lloydwood@users.sourceforge.net.
+
+There is also a savi-developers mailing list for discussion:
+https://lists.sourceforge.net/lists/listinfo/savi-developers
+
+SaVi's code layout believes that a tab is four spaces. C code uses
+an indent of two spaces, while Tcl code uses an indent of four spaces.
+
+
+
+8. VERSION HISTORY OF SAVI
+==========================
+
+1.5.1  Minor bugfixes. Cygwin Tcl/Tk 8.6 compatibility, June 2017.
+
+1.5.0  Coverage gif animations with gifsicle, can load TLEs
+       from the web. September 2016.
+
+1.4.9  Coverage "Show map" now controls Geomview, removes legacy
+       disk scratchfile texturemapping method. January 2016.
+
+1.4.8  Bugfixes to new colorful coverage map. Wider support for
+       Tcl/Tk 8.6. January 2015.
+
+1.4.7  Minor bugfixes. Fisheye geostationary ring and parallels.
+       New colorful unprojected land/sea coverage map. January 2015.
+
+1.4.6  Minor bugfixes. Cygwin unix Tcl/Tk 8.5 compatibility. May 2013.
+
+1.4.5  Minor bugfixes. Mac ActiveTcl compatibility. April 2011.
+
+1.4.4  Minor bugfixes. Tcl/Tk 8.6b1 compatibility. February 2011.
+
+1.4.3  Minor bugfixes. Better Mac OS X compatibility. December 2009.
+
+1.4.2  Minor bugfixes. February 2009.
+
+1.4.1  Full help system. Fixes to edit dialog problems introduced by
+       sunlight support. January 2009.
+
+1.4.0  Tk 8.5 and Mac OS X 10.5 (Leopard) compatibility. Adds satellite
+       names, sunlight on map, varying (1-19) levels of coverage
+       shading.  Vastly-improved high-performance coverage texturemap
+       piping to Geomview.  Shift- and control-click multiple
+       satellites in the list.  June 2008.
+
+1.3.2  Blending user interface with Mac OS X Aqua and Cygwin
+       environments.
+
+1.3.1  Mac OS X port and gcc 4.0 compatibility.
+
+1.3    Includes all work done for a workshop on satellite applications
+       and constellations given as a guest lecturer at the
+       International Space University Summer Session. Students used
+       SaVi in class exercises, July 2006.
+
+1.2.x  These developments bring together a variety of contributions
+       in a single package, 2001 and onwards.
+
+1.1    Diverse versions with various modifications,
+       not widely released, 1999.
+
+1.0    First public release of SaVi binaries and source code, 1997.
+
+
+
+8. ACKNOWLEDGEMENTS FOR SAVI
+============================
+
+Martin Lo, Polly Estabrook and David Bell at
+NASA's Jet Propulsion Lab inspired the SaVi project.
+
+Patrick Worfolk and Robert Thurman created the SaVi project
+while at the Geometry Center, with support from the Geometry Center
+technical staff, especially Stuart Levy, Lori Thomson and Nicolas Vera.
+
+Gregory LaCoste contributed coverage interval decay and other code to
+the SaVi project.
+
+Claus-Justus Heine contributed assistance with pipes and 64-bit
+machines, and made inline texturemap streaming and many other things
+possible with his thoughtful additions to Geomview.
+
+Ari Stern contributed assistance with menus and porting to Mac OS X.
+Matthias Foehl contributed assistance with file dialogs and Cygwin.
+
+Cliff Anders suggested and supported the fisheye equatorial exclusion zone.
+
+Lloyd Wood has contributed simulations of commercial constellations and
+other code significantly enhancing the SaVi project, and maintains SaVi
+at SourceForge.

@@ -1,0 +1,110 @@
+PACKAGING SaVi FOR RELEASES AND BINARY DISTRIBUTION
+==================================================
+$Id: PACKAGING,v 1.24 2016/09/03 03:39:36 lloydwood Exp $
+
+1. Packaging SaVi for binary distribution
+2. Packaging SaVi for releases
+
+
+
+1. PACKAGING SAVI FOR BINARY DISTRIBUTION
+=========================================
+
+If you're packaging SaVi to release a .rpm, .deb or similar, great!
+Please go ahead. I hope that the following notes will be helpful.
+If these notes could be improved, please let me know.
+
+SaVi requires Tcl and Tk as package dependencies. Most makefiles and
+savi launch script expect 8.5, but any version of 8.x can be compiled with.
+You will want to compile SaVi with zlib (steps are detailed in
+README-COVERAGE-TEXTUREMAP) and have zlib as an additional package dependency.
+geomview and gifsicle are optional dependencies.
+
+Once you have compiled SaVi, check that the SaVi help menu's 'About SaVi...'
+dialog indicating the compilation date and build source is suitable.
+
+Once SaVi has been built, the only directory that is safe to remove is src/
+(and src/include). All other directories are used by the SaVi executable.
+You will want to remove the .geomview file if having invisible files in
+a package is undesirable.
+
+SaVi users progress with time from reading the manual and helpfiles to reading
+scripts in data/ before copying scripts and editing them to create their own,
+so these all need to be in one place - the savi directory. Textfiles are loaded
+in by the executable for its help menu, and are linked to from the manual in
+manual/ - please do not remove these, though making additional copies
+elsewhere is fine, and they can be loaded in by adjusting $SAVI where indicated
+near the end of the launch script. In the top-level directory, only the
+Makefile, configure, and PACKAGING files are now redundant. Makefiles can be
+removed from all directories and subdirectories (src/include and manual/images).
+
+In bin/ two copies of the SaVi binary are deliberately created on
+compilation, as bin/SaVi and bin/SaVi-arch.bin.
+This can allow multiple binary architectures to coexist with different arch
+names, with the more recent build overwriting bin/SaVi. (SaVi can't make
+assumptions about the availability of symlinks, and creating bin/SaVi
+supports src/Makefile_defs_anything and 'make ARCH=anything'.) If packaging
+for one binary platform, you can delete one executable to save space.
+On Mac OS X, keeping bin/SaVi is preferred, as the executable name is shown
+in the menubar as the application name.
+
+To create a 64-bit package, you could 'make ARCH=x86_64' (or just make)
+on a 64-bit linux system -- but the savi launch script will give an
+ARCH=linux -linux.bin executable precedence over an -x86-64.bin executable.
+Although the platform where -x86-64.bin was built reported itself as 64-bit,
+we don't know about the compile chain or where the binary is run, and
+defaulting to 32-bit appears safest.
+
+The detailed Earth map is freely available from NASA's Blue Marble project.
+This unprojected map is in
+  oogl/blue_marble_land_shallow_topo_2048.jpeg
+and is loaded by oogl/earth_fancy.oogl and checked for by src/gv_init.c.
+Geomview requires the jpegtopnm utility, from the netpbm package
+available at http://netpbm.sourceforge.net/
+in its path to unpack this image into a less space-efficient format.
+Since that is a Geomview dependency, Geomview use is optional
+with SaVi, and use of the detailed Earth map is optional with Geomview,
+SaVi only includes the compact .jpeg file.
+
+
+
+2. PACKAGING SaVi FOR RELEASES
+==============================
+
+This is an aide-memoire for the SaVi maintainers when preparing development
+for release. Don't package on Mac OS X, to avoid invisible files.
+
+If repackaging to fix a packaging problem with version a/b/c,
+include a RELEASE-NOTE file indicating changes. Do not change VERSION.
+Individual files may be replaced with files from CVS, or have CVS
+information removed should changes warrant.
+
+a. Delete /savi-dev and pull a fresh copy from the CVS repository.
+b. Mark CVS HEAD with cvs tag savi_1_5_X. Commit.
+c. Edit end of README to indicate version and major changes.
+d. Update VERSION to X+1 development, commit.
+e. Delete and pull another fresh copy to avoid e.g. editing backup files.
+f. Remove all CVS directories. Remember src/include/CVS, manual/images/CVS.
+   \rm -fr CVS; \rm -fr */CVS; \rm -fr */*/CVS
+g. Edit VERSION to indicate release and give date.
+h. Edit src/Makefile to comment DEBUGFLAGS lines. Delete CVS Id line.
+i. Edit configure script variable to indicate version. Delete CVS Id line.
+j. Rename savi-dev/ to savi1.5.X/ to indicate version.
+k. Check for unneeded executable bits on all source files, e.g.
+   chmod -x tcl/sunlight.tcl, src/sun.c, manual/index.html, manual/images/*,
+   data/o3b-networks.tcl, data/skybridge-80.tcl, data/us-patent-*, maps/*
+   (since permissions can't be fixed in the CVS original).
+l. touch -t all directories with a suitable timestamp, starting with
+   src/include, ending with savi1.5.X. Also touch configure and VERSION.
+m. Create tarball (tar cvf savi1.5.X-release.tar savi1.5.X), touch, gzip -9.
+n. tar xvfz elsewhere and build to check all works.
+o. Pull copy of savi-dev/ from CVS and build for further work.
+p. Put tarball on sourceforge, local webpages, update pages.
+q. Announce on mailing lists etc. Announce on SourceForge blog.
+   Announce on SourceForge News: http://sourceforge.net/p/savi/news/
+   Announce on fresh(code): http://freshcode.club
+   
+
+
+Lloyd Wood
+lloydwood@users.sourceforge.net

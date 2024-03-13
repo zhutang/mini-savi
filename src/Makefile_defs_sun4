@@ -1,0 +1,53 @@
+#
+# Makefile_defs_sun4
+#
+# Definitions for Solaris, when generic 'make' picks up on $ARCH=sun4
+#
+# Always run make ARCH=platform from the top-level savi directory.
+#
+# $Id: Makefile_defs_sun4,v 1.3 2007/12/18 18:22:05 lloydwood Exp $
+
+
+########################################################
+#                                                      #
+# Set machine type -- suffix for savi                  #
+#                                                      #
+########################################################
+MACH = sun4
+
+########################################################
+#                                                      #
+# set CC to an ANSI C compiler                         #
+#                                                      #
+########################################################
+CC = gcc
+
+# override line terminator for version.c creation
+LINEEND =
+
+########################################################
+#                                                      #
+# set TCL_INCLUDES so that the compiler can            #
+# find the tcl.h and tk.h                              #
+#                                                      #
+# if tcl/tk is installed in a standard place           #
+# it is not necessary to set this                      #
+#                                                      #
+########################################################
+TCL_INCLUDES = -I/usr/local/include
+
+########################################################
+#                                                      #
+# set TCL_LIBS so that the compiler can find           #
+# libtcl.a and libtk.a                                 #
+#                                                      #
+########################################################
+TCL_LIBS = -L/usr/local/lib -ltk -ltcl
+
+########################################################
+#                                                      #
+# Set OTHER_LIBS so that any other stuff needing to    #
+# be linked in will be!                                #
+#                                                      #
+########################################################
+OTHER_LIBS = -lsocket -lnsl -ldl

@@ -1,0 +1,89 @@
+#! /bin/sh
+
+VERSION="savi1.5.1"
+
+echo "Please read the $VERSION/README file."
+echo
+
+ARCH=unknown
+
+if [ -f /vmlinuz -o -f /boot/vmlinuz ]; then
+  ARCH=linux
+  NAME=Linux
+  if [ -f /etc/debian_version ]; then
+     ARCH=ubuntu
+     NAME="Debian/Ubuntu variant"
+  fi
+elif [ -d /devices ]; then
+  ARCH=sun
+  NAME=Solaris
+elif [ -d /usr/bsd -a -d /usr/sbin ]; then
+  ARCH=irix
+  NAME="SGI IRIX"
+elif [ -d /cygdrive ]; then
+  ARCH=cygwin
+  NAME="Cygwin on Windows"
+elif [ -d /System ]; then
+  ARCH=macosx
+  NAME="Mac OS X"
+elif [ -d /sys/boot ]; then
+  ARCH=freebsd
+  NAME=FreeBSD
+fi
+
+if [ "${ARCH}" = unknown ]; then
+  echo "This system isn't familiar. You could try building SaVi with just:"
+  echo "  cd $VERSION; make; ./savi"
+  echo "You may need to edit the generic $VERSION/src/Makefile_defs_ to build."
+  # set for citing with Makefile_defs_
+  ARCH=""
+else
+  echo "This appears to have a $NAME operating system installed."
+  echo "A brief getting-started summary is given here:"
+  echo "  cd $VERSION; make ARCH=$ARCH; ./savi"
+  echo "You may need to edit $VERSION/src/Makefile_defs_$ARCH to build."
+  echo
+  echo "Replace ARCH value with the name of another platform"
+  echo "(linux, ubuntu, freebsd, cygwin, macosx, sun or irix) if needed."
+fi
+
+if [ "${ARCH}" = macosx ]; then
+  echo
+  echo "Please read the BUGS file for Mac-specific problems and workarounds!"
+  if [ -d /Library/Frameworks/Tcl.framework/Headers -a -d /Library/Frameworks/Tk.framework/Headers ]; then
+    echo "ActiveTcl appears to already be installed, and can be used."
+    echo "Edit src/Makefile_defs_macosx before compiling SaVi."
+  else
+    echo "ActiveTcl can be installed to improve Tcl/Tk reliability."
+    echo "Read and edit src/Makefile_defs_macosx before compiling SaVi."
+  fi
+  echo "10.5 Leopard users may need to launch savi with: savi -redrawn-menus"
+elif [ "${ARCH}" = freebsd ]; then
+  echo "FreeBSD users may need to edit savi-dev/tcl/Makefile where commented."
+fi
+
+if [ -f /usr/include/zlib.h -o -f /usr/local/include/zlib.h ]; then
+  if [ -f /usr/lib/libz.a -o -f /usr/local/lib/libz.a -o -f /usr/lib64/libz.a -o -f /usr/ocal/lib64/libz.a ]; then
+    echo
+    echo "zlib appears to be installed on this system."
+    echo "You can edit $VERSION/src/Makefile to remove the -DNO_ZLIB flag."
+    echo "Make sure that:"
+    echo "  OTHER_LIBS = -lz"
+    echo "is at the end of the Makefile_defs_$ARCH file that will be used."
+    echo "This can improve texturemapping performance with Geomview,"
+    echo "as described in the README-COVERAGE-TEXTUREMAP textfile."
+  fi
+fi
+
+echo
+echo "You may also need to edit the $VERSION/savi wrapper script that runs"
+echo "the SaVi binary to set environment variables appropriately."
+echo "You may need to edit the Tcl/Tk library locations set in this ./savi"
+echo "script by TCL_LIBRARY and TK_LIBRARY when building dynamically."
+echo
+echo "The ./savi wrapper script sets \$SAVI to the location"
+echo "of the $VERSION/ directory that contains files all SaVi"
+echo "binaries need, and also contains the README file that you"
+echo "need to read. Always run SaVi with the ./savi wrapper script."
+echo
+echo "Enjoy playing with SaVi!"

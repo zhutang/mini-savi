@@ -1,0 +1,16 @@
+# $Id: earth_coverage_unp.oogl,v 1.1 2008/04/02 02:21:55 lloydwood Exp $
+
+  appearance {
+    texturing
+    shading smooth
+    texture {
+      image {: coverage }
+      transform {
+        1 0 0 0
+        0  1 0 0
+        0  0 1 0
+        .5 0 0 1
+      }
+    }
+  }
+  STSPHERE CYLINDRICAL 1 0 0 0

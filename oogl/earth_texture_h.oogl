@@ -1,0 +1,20 @@
+# SaVi by Robert Thurman (thurman@geom.umn.edu) and
+#         Patrick Worfolk (worfolk@alum.mit.edu).
+#
+# Copyright (c) 1997 by The Geometry Center.
+# This file is part of SaVi.  SaVi is free software;
+# you can redistribute it and/or modify it only under
+# the terms given in the file COPYRIGHT which you should
+# have received along with this file.  SaVi may be
+# obtained from:
+# http://savi.sourceforge.net/
+# http://www.geom.uiuc.edu/locate/SaVi
+
+# $Id: earth_texture_h.oogl,v 1.2 2016/09/03 06:49:39 lloydwood Exp $
+# loaded ready for Earth texturemaps.
+
+(read geometry { define earth_h < "$SAVI/oogl/earth.oogl" })
+
+(read geometry { define earth_vect_texture_sphere_h {
+	LIST {: earth_h} {: earth_vect_h}
+	} } )

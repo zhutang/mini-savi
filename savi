@@ -1,0 +1,290 @@
+#! /bin/sh
+######################################################
+#
+#  SaVi by Lloyd Wood (lloydwood@users.sourceforge.net),
+#          Patrick Worfolk (worfolk@alum.mit.edu) and
+#          Robert Thurman.
+#
+#  Copyright (c) 1997 by The Geometry Center.
+#  Also Copyright (c) 2017 by Lloyd Wood.
+#
+#  This file is part of SaVi.  SaVi is free software;
+#  you can redistribute it and/or modify it only under
+#  the terms given in the file COPYRIGHT which you should
+#  have received along with this file.  SaVi may be
+#  obtained from:
+#  http://savi.sourceforge.net/
+#  http://www.geom.uiuc.edu/locate/SaVi 
+#
+######################################################
+#
+# Script that is always used to launch the binary SaVi executable
+#
+# $Id: savi,v 1.87 2017/06/26 04:17:00 lloydwood Exp $
+
+#
+# If SAVI environment variable indicating directory is undefined
+# then set it to be the path of this file. Make this the directory.
+#
+: ${SAVI:=`dirname "$0"`}
+SAVI=$(cd "${SAVI}" && pwd)
+
+#
+# If this script is moved from the SaVi installation tree and run
+# elsewhere, then uncomment the following line:
+# SAVI=/usr/lib/savi
+# and replace /usr/lib/savi with the location of
+# your SaVi installation.
+#
+export SAVI
+
+#
+# Default executable absolute location and name
+#
+SAVIBIN="${SAVI}/bin/SaVi"
+
+#
+# Set locations of tcl and tk library code needed at runtime
+# Cygwin and Mac OS X may be special cases, handled later.
+# The version numbers used here should match the versions given
+# in the src/Makefile_defs_ARCH file used to compile SaVi.
+# Try under /usr/lib and /usr/local/lib.
+# If using other versions or locations, insert in the next lines.
+#
+TCL_LIBRARY=""
+TK_LIBRARY=""
+
+if [ ! -d "$TK_LIBRARY" ]; then
+  TCL_LIBRARY=/usr/lib/tcl8.6
+  TK_LIBRARY=/usr/lib/tk8.6
+elif [ ! -d "$TK_LIBRARY" ]; then
+  TCL_LIBRARY=/usr/local/lib/tcl8.6
+  TK_LIBRARY=/usr/local/lib/tk8.6
+elif [ ! -d "$TK_LIBRARY" ]; then
+  TCL_LIBRARY=/usr/lib/tcl8.5
+  TK_LIBRARY=/usr/lib/tk8.5
+elif [ ! -d "$TK_LIBRARY" ]; then
+  TCL_LIBRARY=/usr/local/lib/tcl8.5
+  TK_LIBRARY=/usr/local/lib/tk8.5
+elif [ ! -d "$TK_LIBRARY" ]; then
+  # SGI IRIX Nekoware
+  TCL_LIBRARY=/usr/nekoware/lib
+  TK_LIBRARY=/usr/nekoware/lib
+fi
+
+if [ ! -d "$TK_LIBRARY" ]; then
+  # reasonable default, also default for Mac OS X.
+  TCL_LIBRARY=/usr/lib
+  TK_LIBRARY=/usr/lib
+fi
+
+
+#
+# Default parameters to pass to executable
+#
+params=""
+
+# start messages on clean line
+echo
+
+#
+# Check for known machine types
+#
+if [ -f /etc/debian_version ]; then
+  # Debian GNU/kFreeBSD is Debian, but not Linux, so we test first.
+  # Ubuntu is the most popular Debian variant; clue for ubuntu users.
+  ARCH=ubuntu
+elif [ -f /vmlinuz -o -f /boot/vmlinuz ]; then
+  # test doesn't handle changed vmlinuz-<version> directories.
+  ARCH=linux
+elif [ -d /devices ]; then
+  ARCH=sun
+elif [ -d /usr/bsd -a -d /usr/sbin ]; then
+  ARCH=irix
+elif [ -d /proc/cygdrive ]; then
+  ARCH=cygwin
+  if [ ! -d /usr/lib/tk8.6 ]; then
+    # unix port of Tk 8.6 not installed
+    if [ ! -d /usr/lib/tk8.5 ]; then
+      # unix port of Tk 8.5 not installed
+      if [ -d /usr/share/tk/8.4 ]; then
+        # Insight Tk 8.4 is installed and still in use.
+        echo "SaVi: detected legacy Insight Tcl/Tk 8.4 in Cygwin." >&2
+	ARCH=cygwin84
+        TCL_LIBRARY=/user/share/tcl8.4
+        TK_LIBRARY=/usr/share/tk8.4
+      fi
+    fi
+  fi
+elif [ -d /System ]; then
+  ARCH=macosx
+  # Mac OS X installs libraries in shared folder /usr/lib, selected above.
+  # Tk in 10.5 Leopard has menubar bugs.
+  # Not required by 10.6 Snow Leopard or 10.4 Tiger users
+  if [ -d /Developer/SDKs ]; then
+    # we can guess version from libraries available
+    if [ ! -d /Developer/SDKs/MacOSX10.7.sdk ]; then
+      # We're not later than 10.6. 10.7 has 10.7+10.6 SDKs.
+      if [ ! -d /Developer/SDKs/MacOSX10.6.sdk ]; then
+        # We're not later than 10.5
+        if [ -d /Developer/SDKs/MacOSX10.5.sdk ]; then
+          # We are 10.5 - use popup menus instead.
+	  # Comment out below lines if ActiveTcl is installed on 10.5
+	  # and SaVi has been compiled with it - see src/Makefile_defs_macosx
+	  echo "SaVi: using popup menus to work around a Mac OS X 10.5-specific problem." >&2
+          params="-redrawn-menus ${params}"
+	fi
+      fi
+    fi
+  fi
+elif [ -d /sys/boot ]; then
+  ARCH=freebsd
+else
+  ARCH=unknown
+fi
+
+# are we 64-bit? Known to affect linux installs.
+MACHINE=`uname -m`
+KNOWN64=x86_64
+SIXTYFOUR=no
+if [ ${MACHINE} = ${KNOWN64} ]; then
+  SIXTYFOUR=yes
+fi
+
+#
+# Sanity check $SAVI location
+#
+if [ ! -f "${SAVI}/savi" ]; then
+  echo "SaVi: a copy of this script is not at $SAVI/savi. Is \$SAVI set correctly?" >&2
+fi
+
+#
+# Verify that tcl and tk directories exist
+#
+EDIT=no
+
+if [ ! -d "$TCL_LIBRARY" ]; then
+  echo "SaVi: selected TCL_LIBRARY $TCL_LIBRARY was not found." >&2
+  echo "      Does Tcl need to be installed?" >&2
+  EDIT=yes
+fi
+
+if [ ! -d "$TK_LIBRARY" ]; then
+  echo "SaVi: selected TK_LIBRARY $TK_LIBRARY was not found." >&2
+  echo "      Does Tk need to be installed?" >&2
+  EDIT=yes
+fi
+
+if [ ${EDIT} = "yes" ]; then
+  echo "      Please edit this script to set correct LIBRARY locations. Read the comments." >&2
+fi
+
+export TCL_LIBRARY
+export TK_LIBRARY
+
+#
+# Do we need to complain that SaVi has not been compiled properly?
+#
+NOTFOUND=no
+COMPLAIN=no
+MAKEFILE=no
+
+#
+# Try specific binary, then default to filename without extension
+#
+if [ ! ${ARCH} = "unknown" ]; then
+  PLATFORMSAVIBIN="${SAVIBIN}-${ARCH}.bin"
+  if [ -f "${PLATFORMSAVIBIN}" ]; then
+    # found the platform-specific executable
+    if [ -f "${SAVIBIN}" ]; then
+      # if default as well, indicate a choice was made - the safer choice.
+      echo "SaVi: selected platform-specific binary $PLATFORMSAVIBIN" >&2
+    fi
+    SAVIBIN="${PLATFORMSAVIBIN}"
+  else
+    # try default SaVi binary; assuming it's for our platform.
+    if [ ! -f "${SAVIBIN}" ]; then
+      # couldn't find default binary. Are we 64-bit?
+      if [ ${SIXTYFOUR} = yes ]; then
+	SAVI64BIN="${SAVIBIN}-${KNOWN64}.bin"
+        if [ -f "${SAVI64BIN}" ]; then
+          # found the 64-bit executable
+	  SAVIBIN="${SAVI64BIN}"
+	  echo "SaVi: found 64-bit binary $SAVI64BIN" >&2
+	else
+	  echo "SaVi: couldn't find 64-bit binary $SAVI64BIN" >&2
+	  NOTFOUND=yes
+	fi
+      else
+        # couldn't find any SaVi* binary.
+	NOTFOUND=yes
+      fi
+    fi
+  fi
+fi
+
+if [ ${NOTFOUND} = yes ]; then
+  echo "SaVi: couldn't find platform-specific binary $PLATFORMSAVIBIN" >&2
+  echo "SaVi: couldn't find generic executable binary $SAVIBIN." >&2
+  COMPLAIN=yes
+  if [ ! -f "${SAVI}/src/main.o" ]; then
+     echo "SaVi: can't see expected main.o object file in the $SAVI/src/ directory." >&2
+     echo "      Has the master Makefile been run to call the C Makefile?" >&2
+     MAKEFILE=yes
+  fi
+fi
+
+if [ ! -f "${SAVI}/tcl/tclIndex" ]; then
+      echo "SaVi: couldn't find generated list of Tcl commands in $SAVI/tcl/tclIndex" >&2
+      echo "      Has the master Makefile been run to call the Tcl Makefile?" >&2
+      MAKEFILE=yes
+      COMPLAIN=yes
+fi
+
+if [ ${MAKEFILE} = "yes" ]; then
+  echo "      The master Makefile in $SAVI must run all other makefiles to make SaVi work." >&2
+fi
+
+if [ ${COMPLAIN} = "yes" ]; then
+  echo "SaVi: Try compiling SaVi by making in the same directory as this script:" >&2
+  echo "        cd $SAVI" >&2
+  echo "        make ARCH=$ARCH" >&2
+  echo "      before running this script again to launch and run the SaVi binary." >&2
+fi
+
+#
+# Run binary
+#
+if [ ! -f ${SAVIBIN} ]; then
+  echo "SaVi: did not attempt to launch a binary executable that was not found.">&2
+  exit
+fi
+
+#
+# If savi tree has been split, with files (data/ oogl/ tcl/ maps/ and textfiles)
+# placed elsewhere, then uncomment and edit the following line to reset SAVI to
+# that other tree location.
+# SAVI=/usr/share/savi
+# This is useful for Debian and Cygwin packagers.
+
+#
+# Change directory
+#
+cd "$SAVI"
+
+#
+# See if we need to add a -geomview flag
+#
+if [ -t 1 ]; then
+  exec > /dev/null
+else
+  case "$*" in
+    *-geomview*) ;;
+    *) set -- -geomview $*;;
+  esac
+
+  # send SAVI env variable to geomview
+  echo "(setenv SAVI \"$SAVI\")"
+fi
+
+exec "${SAVIBIN}" $* ${params}

@@ -1,0 +1,26 @@
+#
+# ambient_light.oogl
+#
+# restores default lighting model in Geomview
+#
+
+(progn
+ (merge-baseap appearance { lighting {
+	ambient 0.2 0.2 0.2
+	replacelights
+	light {
+		ambient 0.000000 0.000000 0.000000
+		color 0.750000 0.750000 0.750000
+		position 0.000000 0.000000 10.000000 0.000000
+	}
+	light {
+	        ambient 0.000000 0.000000 0.000000
+		color 0.600000 0.600000 0.600000
+		position 0.000000 1.000000 -1.000000 0.000000
+	}
+	light {
+		ambient 0.000000 0.000000 0.000000
+		color 0.400000 0.400000 0.400000
+		position 1.000000 -2.000000 -1.000000 0.000000
+	}
+} } ) )

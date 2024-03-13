@@ -1,0 +1,22 @@
+# $Id: earth_fancy.oogl,v 1.4 2011/04/26 20:41:31 lloydwood Exp $
+
+appearance {
+	material { diffuse 1.0 1.0 1.0 }
+#	*-evert
+#	+backcull
+	+texturing
+	shading smooth
+	texture {
+	    # Detailed Earth map from NASA's Blue Marble project.
+	    # http://visibleearth.nasa.gov/
+	    # free for educational use.
+	    file "blue_marble_land_shallow_topo_2048.jpeg"
+	    transform {
+		1 0 0 0
+		0  1 0 0
+		0  0 1 0
+		.5 0 0 1
+	    }
+	}
+}
+STSPHERE CYLINDRICAL 1 0 0 0

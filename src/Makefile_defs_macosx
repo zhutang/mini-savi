@@ -1,0 +1,65 @@
+#
+# Makefile_defs_macosx
+#
+# Makefile definitions that first worked on Mac OS X 10.4.7 using gcc 4.0.1
+#
+# Always run make ARCH=platform from the top-level savi directory.
+#
+# $Id: Makefile_defs_macosx,v 1.7 2014/11/30 12:45:40 lloydwood Exp $
+
+
+########################################################
+#                                                      #
+# Set machine type -- suffix for savi                  #
+#                                                      #
+# If empty symlink in Makefile fails for Cygwin (./!.) #
+#                                                      #
+########################################################
+MACH = macosx
+
+########################################################
+#                                                      #
+# set CC to an ANSI C compiler                         #
+#                                                      #
+########################################################
+CC = gcc
+
+########################################################
+#                                                      #
+# set TCL_INCLUDES so that the compiler can            #
+# find the tcl.h and tk.h                              #
+#                                                      #
+# If tcl/tk is installed in a standard place           #
+# it is not necessary to set this. You may need to     #
+# change the numbers to match your version of tcl/tk.  #
+# The numbers in the topmost savi script should also   #
+# match.                                               #
+#                                                      #
+########################################################
+# XQuartz installs Xlib headers here
+# - needed on Mac OS X 10.9 and later.
+TCL_INCLUDES = -I/opt/X11/include
+
+########################################################
+#                                                      #
+# set TCL_LIBS so that the compiler can find           #
+# libtcl.a and libtk.a. Alter to suit - see above.     #
+#                                                      #
+########################################################
+TCL_LIBS = -ltcl -ltk
+
+# If ActiveState ActiveTcl has been installed from
+# http://www.activestate.com/activetcl/downloads
+# build with that by uncommenting the following line:
+# TCL_LIBS = -F/Library/Frameworks -framework Tcl -framework Tk
+
+########################################################
+#                                                      #
+# Set OTHER_LIBS so that any other stuff needing to    #
+# be linked in will be!                                #
+#                                                      #
+########################################################
+# -lz is for gzip compression library http://www.zlib.net/
+# used for compressing textures to Geomview.
+
+OTHER_LIBS = -lz

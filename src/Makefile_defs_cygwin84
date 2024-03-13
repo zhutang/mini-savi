@@ -1,0 +1,91 @@
+#
+# Makefile_defs_cygwin
+#
+# Definitions which work for a Win32/cygwin system running Insight Tcl 8.4.
+# Insight Tcl/Tk was replaced in Cygwin October 2011 by a more conventional
+# unix port.
+#
+# If you still use Insight Tcl and haven't updated, use this:
+#    make ARCH=cygwin84
+# in top-level directory.
+# 
+# http://www.cygwin.com/
+# Originally ported by Matthias Foehl <matthias.foehl@gmx.de>
+#
+# Always run make ARCH=platform from the top-level savi directory.
+#
+# Cygwin needs to have installed from Setup:
+#  under Devel:
+#   binutils
+#   gcc-core and its dependencies
+#   make
+#   zlib-devel (optional, requires editing flag in src/Makefile)
+#  under Libs:
+#   tcltk
+#  under X11:
+#   libX11-devel and its dependencies (lets Tcl/Tk files compile)
+#
+# X11 binaries are only needed if Geomview is installed. See:
+# http://personal.ee.surrey.ac.uk/Personal/L.Wood/software/SaVi/building-under-Windows/
+#
+# You may also need to alter the name of the tclsh
+# executable set in ~savi/tcl/Makefile
+# only if running a much older version of Cygwin.
+#
+# TK_LIBRARY = /usr/lib/tk8.4
+#
+# $Id: Makefile_defs_cygwin84,v 1.2 2012/02/19 12:36:55 lloydwood Exp $
+
+
+########################################################
+#                                                      #
+# Set machine type -- suffix for savi                  #
+#                                                      #
+########################################################
+MACH = cygwin
+
+########################################################
+#                                                      #
+# set CC to an ANSI C compiler                         #
+#                                                      #
+########################################################
+CC = gcc
+
+# override line terminator for version.c creation
+LINEEND =
+
+########################################################
+#                                                      #
+# set TCL_INCLUDES so that the compiler can            #
+# find the tcl.h and tk.h                              #
+#                                                      #
+# If tcl/tk is installed in a standard place           #
+# it is not necessary to set this. You may need to     #
+# change the numbers to match your version of tcl/tk.  #
+# The numbers in the topmost savi script should also   #
+# match.                                               #
+#                                                      #
+########################################################
+TCL_INCLUDES =
+
+########################################################
+#                                                      #
+# set TCL_LIBS so that the compiler can find           #
+# libtcl.a and libtk.a. Alter to suit - see above.     #
+#                                                      #
+########################################################
+TCL_LIBS = -ltk84 -ltcl84
+
+########################################################
+#                                                      #
+# Set OTHER_LIBS so that any other stuff needing to    #
+# be linked in will be!                                #
+#                                                      #
+########################################################
+# -lz is for gzip compression library http://www.zlib.net/
+# used for compressing textures to Geomview.
+
+OTHER_LIBS = -lz
+
+# OTHER_LIBS = -static
+# -ldl

@@ -1,0 +1,56 @@
+#
+# Makefile_defs_irix
+#
+# Definitions which work for SGI Irix systems.
+#
+# Supported by Nekochan:
+# http://forums.nekochan.net/viewtopic.php?t=16730306
+#
+# Always run make ARCH=platform from the top-level savi directory.
+#
+# $Id: Makefile_defs_irix,v 1.4 2016/02/09 01:37:21 lloydwood Exp $
+
+
+########################################################
+#                                                      #
+# Set machine type -- suffix for savi                  #
+#                                                      #
+########################################################
+MACH = irix
+
+########################################################
+#                                                      #
+# set CC to an ANSI C compiler                         #
+#                                                      #
+# We have also used gcc on SGI irix 5.x machines       #
+#                                                      #
+#                                                      #
+########################################################
+CC = gcc
+
+########################################################
+#                                                      #
+# set TCL_INCLUDES so that the compiler can            #
+# find the tcl.h and tk.h                              #
+#                                                      #
+# if tcl/tk is installed in a standard place           #
+# it is not necessary to set this                      #
+#                                                      #
+########################################################
+TCL_INCLUDES = -I/usr/nekoware/include
+
+########################################################
+#                                                      #
+# set TCL_LIBS so that the compiler can find           #
+# libtcl.a and libtk.a                                 #
+#                                                      #
+########################################################
+TCL_LIBS = -L/usr/nekoware/lib -ltk8.4 -ltcl8.4
+
+########################################################
+#                                                      #
+# Set OTHER_LIBS so that any other stuff needing to    #
+# be linked in will be!                                #
+#                                                      #
+########################################################
+OTHER_LIBS = -ldl
