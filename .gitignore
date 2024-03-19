@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+savi
+bin/SaVi
+bin/SaVi-linux.bin
+src/version.c
+tcl/mkindex.tcl
+tcl/tclIndex
